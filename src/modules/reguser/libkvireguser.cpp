@@ -40,8 +40,6 @@
 #include "KviPointerList.h"
 #include "KviIrcMask.h"
 
-#include <QSplitter> // FIXME: REmove this!
-
 //#warning "$reguser.matches..."
 //#warning "$reguser.clear"
 
@@ -155,7 +153,7 @@ static bool reguser_kvs_cmd_edit(KviKvsModuleCommandCall * c)
 	@short:
 		Registers a user
 	@syntax:
-		reguser.add [-r] [-f] [-q] [-g=group] <name> [mask]
+		reguser.add [-r] [-f] [-q] [-g=group] <name> <mask>
 	@description:
 		Adds a new entry with the specified <name> to the database.[br]
 		If the database contains an entry with the same <name>, this command just prints
@@ -183,8 +181,7 @@ static bool reguser_kvs_cmd_edit(KviKvsModuleCommandCall * c)
 
 static bool reguser_kvs_cmd_add(KviKvsModuleCommandCall * c)
 {
-	QString szName;
-	QString szMask;
+	QString szName, szMask;
 	KVSM_PARAMETERS_BEGIN(c)
 	KVSM_PARAMETER("name", KVS_PT_STRING, 0, szName)
 	KVSM_PARAMETER("mask", KVS_PT_STRING, 0, szMask)
@@ -200,13 +197,8 @@ static bool reguser_kvs_cmd_add(KviKvsModuleCommandCall * c)
 		g_pRegisteredUserDataBase->removeUser(szName);
 
 	KviRegisteredUser * u = g_pRegisteredUserDataBase->addUser(szName);
-	QString group;
-	if(c->hasSwitch('g', "group"))
-	{
-		c->switches()->getAsStringIfExisting('g', "group", group);
-		u->setGroup(group);
-	}
-	if(u == nullptr)
+
+	if(!u)
 	{
 		if(c->hasSwitch('f', "force"))
 		{
@@ -221,11 +213,17 @@ static bool reguser_kvs_cmd_add(KviKvsModuleCommandCall * c)
 
 	if(u)
 	{
+		if(c->hasSwitch('g', "group"))
+		{
+			QString group;
+			c->switches()->getAsStringIfExisting('g', "group", group);
+			u->setGroup(group);
+		}
 		if(!szMask.isEmpty())
 		{
 			KviIrcMask * m = new KviIrcMask(szMask);
 			u = g_pRegisteredUserDataBase->addMask(u, m);
-			if(u != nullptr)
+			if(u)
 			{
 				if(!c->hasSwitch('q', "quiet"))
 					c->warning(__tr2qs_ctx("Mask %Q is already used to identify user %s", "register"), &szMask, u->name().toUtf8().data());
@@ -1089,11 +1087,11 @@ static bool reguser_kvs_fnc_property(KviKvsModuleFunctionCall * c)
 		bound to the first entry matched by by <user_mask>.[br]
 		If the property is not set, an empty string is returned.[br]
 		If no entry matches <user_mask> this function returns an empty string
-		and does not print any error.[br]
+		and does not print any error.
 		[example]
 			%property = $reguser.matchProperty(<user_mask>,<property_name>)
 		[/example]
-		Is actually a shortcut for:[br]
+		Is actually a shortcut for:
 		[example]
 			%tmp = [fnc]$reguser.match[/fnc](<user_mask>)
 			if("%tmp" != "")%property = $reguser.property(%tmp,<property_name>)

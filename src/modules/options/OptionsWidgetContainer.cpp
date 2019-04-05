@@ -48,8 +48,6 @@ OptionsWidgetContainer::OptionsWidgetContainer(QWidget * par, bool bModal)
 
 	setObjectName("container");
 
-	m_pOptionsWidget = nullptr;
-
 	if(bModal)
 		setWindowModality(par ? Qt::WindowModal : Qt::ApplicationModal);
 }
@@ -148,7 +146,7 @@ void OptionsWidgetContainer::showEvent(QShowEvent * e)
 		move(rect.x() + ((rect.width() - width()) / 2), rect.y() + ((rect.height() - height()) / 2));
 	}
 
-	QWidget::showEvent(e);
+	QDialog::showEvent(e);
 	m_pCancel->setFocus();
 }
 

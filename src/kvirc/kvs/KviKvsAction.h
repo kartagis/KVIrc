@@ -48,7 +48,7 @@ protected:
 
 public:
 	/**
-	* \brief Contructs the action object
+	* \brief Constructs the action object
 	* \param pParent The parent object
 	* \param szName The name of the action
 	* \param szScriptCode The code of the script contained in the action
@@ -67,14 +67,14 @@ public:
 	    const QString & szScriptCode,
 	    const QString & szVisibleName,
 	    const QString & szDescription,
-	    KviActionCategory * pCategory = NULL,
+	    KviActionCategory * pCategory = nullptr,
 	    const QString & szBigIconId = QString(),
 	    const QString & szSmallIconId = QString(),
 	    unsigned int uFlags = 0,
 	    const QString & szKeySequence = QString());
 
 	/**
-	* \brief Contructs the action object
+	* \brief Constructs the action object
 	* \param pParent The parent object
 	* \param szName The name of the action
 	* \param szScriptCode The code of the script contained in the action
@@ -93,7 +93,7 @@ public:
 	    const QString & szScriptCode,
 	    const QString & szVisibleName,
 	    const QString & szDescription,
-	    KviActionCategory * pCategory = NULL,
+	    KviActionCategory * pCategory = nullptr,
 	    const QString & szBigIconId = QString(),
 	    KviIconManager::SmallIcon eSmallIcon = KviIconManager::None,
 	    unsigned int uFlags = 0,

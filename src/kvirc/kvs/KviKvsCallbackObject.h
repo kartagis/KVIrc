@@ -51,11 +51,11 @@ public:
 	};
 	enum CallbackStatus
 	{
-		// succesfull execution
+		// successful execution
 		Success,
 		// error in command
 		Error,
-		// succesfull execution, but halt encountered
+		// successful execution, but halt encountered
 		HaltEncountered,
 		// execution aborted since OnlyIfWindowExists was passed and the target window is dead
 		TargetWindowDead
@@ -80,7 +80,7 @@ protected:
 
 protected:
 	// the parameter list is always shallow!
-	CallbackStatus execute(KviKvsVariantList * pParams = 0, KviKvsVariant * pRetVal = 0);
+	CallbackStatus execute(KviKvsVariantList * pParams = nullptr, KviKvsVariant * pRetVal = nullptr);
 };
 
 #endif //!_KVI_KVS_CALLBACKOBJECT_H_

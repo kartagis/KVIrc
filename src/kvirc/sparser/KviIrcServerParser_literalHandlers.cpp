@@ -699,7 +699,10 @@ void KviIrcServerParser::parseLiteralKick(KviIrcMessage * msg)
 		       szNick, szUser, szHost, szKickMsg))
 			msg->setHaltOutput();
 		if(!KVI_OPTION_STRING(KviOption_stringOnMeKickedSound).isEmpty())
-			KviKvsScript::run("snd.play $0", nullptr, new KviKvsVariantList(new KviKvsVariant(KVI_OPTION_STRING(KviOption_stringOnMeKickedSound))));
+		{
+			KviKvsVariantList soundParams{new KviKvsVariant{KVI_OPTION_STRING(KviOption_stringOnMeKickedSound)}};
+			KviKvsScript::run("snd.play $0", nullptr, &soundParams);
+		}
 
 		QString szPass = chan->hasChannelMode('k') ? chan->channelModeParam('k') : "";
 
@@ -849,6 +852,15 @@ void KviIrcServerParser::parseLiteralPrivmsg(KviIrcMessage * msg)
 	QString szSourceNick, szSourceUser, szSourceHost;
 	msg->decodeAndSplitPrefix(szSourceNick, szSourceUser, szSourceHost);
 
+	// update the user entry in the database right away
+	KviIrcUserDataBase * db = msg->connection()->userDataBase();
+	KviIrcUserEntry * e = db->find(szSourceNick);
+	if (e)
+	{
+		e->setUser(szSourceUser);
+		e->setHost(szSourceHost);
+	}
+
 	QString szTarget = msg->connection()->decodeText(msg->safeParam(0));
 	QString szMsg = msg->connection()->decodeText(msg->safeTrailing());
 
@@ -906,9 +918,21 @@ void KviIrcServerParser::parseLiteralPrivmsg(KviIrcMessage * msg)
 		}
 	}
 
-	// Normal PRIVMSG
+	QString szOriginalTarget = szTarget;
+	QString szPrefixes;
+
+	// check if the channel has some leading mode prefixes
+	while((szTarget.length() > 0) && console->connection()->serverInfo()->supportedStatusMsgPrefixes().contains(szTarget[0]))
+	{
+		szPrefixes += szTarget[0];
+		szTarget.remove(0, 1);
+	}
+
+	// Query PRIVMSG
 	if(msg->connection()->serverInfo()->supportedChannelTypes().indexOf(szTarget[0]) == -1)
 	{
+		szTarget = szOriginalTarget;
+
 		//Ignore it?
 		if(uSource)
 		{
@@ -1028,7 +1052,10 @@ void KviIrcServerParser::parseLiteralPrivmsg(KviIrcMessage * msg)
 				if(query)
 				{
 					if(!KVI_OPTION_STRING(KviOption_stringOnNewQueryOpenedSound).isEmpty())
-						KviKvsScript::run("snd.play $0", nullptr, new KviKvsVariantList(new KviKvsVariant(KVI_OPTION_STRING(KviOption_stringOnNewQueryOpenedSound))));
+					{
+						KviKvsVariantList soundParams{new KviKvsVariant{KVI_OPTION_STRING(KviOption_stringOnNewQueryOpenedSound)}};
+						KviKvsScript::run("snd.play $0", nullptr, &soundParams);
+					}
 				}
 			}
 		}
@@ -1053,9 +1080,7 @@ void KviIrcServerParser::parseLiteralPrivmsg(KviIrcMessage * msg)
 
 			if(!KVI_OPTION_STRING(KviOption_stringOnQueryMessageSound).isEmpty() && !query->hasAttention())
 			{
-				// KviKvsScript does NOT take parameters ownership
 				KviKvsVariantList soundParams(new KviKvsVariant(KVI_OPTION_STRING(KviOption_stringOnQueryMessageSound)));
-				//KviKvsScript::run("snd.play $0",0,&soundParams); <-- we also should provide a window for the script: it's always a good idea
 				KviKvsScript::run("snd.play $0", query, &soundParams);
 			}
 
@@ -1099,8 +1124,7 @@ void KviIrcServerParser::parseLiteralPrivmsg(KviIrcMessage * msg)
 			// we don't have a query here!
 			if(!KVI_OPTION_STRING(KviOption_stringOnQueryMessageSound).isEmpty() && !console->hasAttention())
 			{
-				// same as above
-				KviKvsVariantList soundParams(new KviKvsVariant(KVI_OPTION_STRING(KviOption_stringOnQueryMessageSound)));
+				KviKvsVariantList soundParams{new KviKvsVariant{KVI_OPTION_STRING(KviOption_stringOnQueryMessageSound)}};
 				KviKvsScript::run("snd.play $0", console, &soundParams);
 			}
 
@@ -1140,9 +1164,6 @@ void KviIrcServerParser::parseLiteralPrivmsg(KviIrcMessage * msg)
 		// Channel PRIVMSG
 		KviChannelWindow * chan = msg->connection()->findChannel(szTarget);
 
-		QString szOriginalTarget = szTarget;
-		QString szPrefixes;
-
 		//Ignore it?
 		if(uSource)
 		{
@@ -1157,17 +1178,6 @@ void KviIrcServerParser::parseLiteralPrivmsg(KviIrcMessage * msg)
 				}
 				return;
 			}
-		}
-
-		if(!chan)
-		{
-			// check if the channel has some leading mode prefixes
-			while((szTarget.length() > 0) && console->connection()->serverInfo()->isSupportedModePrefix(szTarget[0].unicode()))
-			{
-				szPrefixes += szTarget[0];
-				szTarget.remove(0, 1);
-			}
-			chan = msg->connection()->findChannel(szTarget);
 		}
 
 		if(!chan)
@@ -1232,6 +1242,15 @@ void KviIrcServerParser::parseLiteralNotice(KviIrcMessage * msg)
 	//Check is it's a server notice (szNick = irc.xxx.net)
 	if(szHost == "*" && szUser == "*" && szNick.indexOf('.') != -1)
 		bIsServerNotice = true;
+
+	// update the user entry in the database right away
+	KviIrcUserDataBase * db = msg->connection()->userDataBase();
+	KviIrcUserEntry * e = db->find(szNick);
+	if (e)
+	{
+		e->setUser(szUser);
+		e->setHost(szHost);
+	}
 
 	// FIXME: "DEDICATED CTCP WINDOW ?"
 
@@ -1475,7 +1494,10 @@ void KviIrcServerParser::parseLiteralNotice(KviIrcMessage * msg)
 				if(query)
 				{
 					if(!KVI_OPTION_STRING(KviOption_stringOnNewQueryOpenedSound).isEmpty())
-						KviKvsScript::run("snd.play $0", nullptr, new KviKvsVariantList(new KviKvsVariant(KVI_OPTION_STRING(KviOption_stringOnNewQueryOpenedSound))));
+					{
+						KviKvsVariantList soundParams{new KviKvsVariant{KVI_OPTION_STRING(KviOption_stringOnNewQueryOpenedSound)}};
+						KviKvsScript::run("snd.play $0", nullptr, &soundParams);
+					}
 				}
 			}
 		}
@@ -1566,7 +1588,7 @@ void KviIrcServerParser::parseLiteralNotice(KviIrcMessage * msg)
 	if(!chan)
 	{
 		// check if the channel has some leading mode prefixes
-		while((szTarget.length() > 0) && console->connection()->serverInfo()->isSupportedModePrefix(szTarget[0].unicode()))
+		while((szTarget.length() > 0) && console->connection()->serverInfo()->supportedStatusMsgPrefixes().contains(szTarget[0]))
 		{
 			szPrefixes += szTarget[0];
 			szTarget.remove(0, 1);
@@ -1684,7 +1706,7 @@ void KviIrcServerParser::parseLiteralTopic(KviIrcMessage * msg)
 	const char * txtptr;
 	int msgtype;
 
-	DECRYPT_IF_NEEDED(chan, msg->safeTrailing(), KVI_OUT_QUERYPRIVMSG, KVI_OUT_QUERYPRIVMSGCRYPTED, szBuffer, txtptr, msgtype)
+	DECRYPT_IF_NEEDED(chan, msg->safeTrailing(), KVI_OUT_TOPIC, KVI_OUT_TOPICCRYPTED, szBuffer, txtptr, msgtype)
 
 	QString szTopic = chan->decodeText(txtptr);
 
@@ -1716,7 +1738,7 @@ void KviIrcServerParser::parseLiteralTopic(KviIrcMessage * msg)
 
 	if(!msg->haltOutput())
 	{
-		chan->output(KVI_OUT_TOPIC,
+		chan->output(msgtype,
 		    __tr2qs("\r!n\r%Q\r [%Q@\r!h\r%Q\r] has changed topic to \"%Q%c\""),
 		    &szNick, &szUser, &szHost, &szTopic, KviControlCodes::Reset);
 	}
@@ -1850,6 +1872,15 @@ void KviIrcServerParser::parseLiteralInvite(KviIrcMessage * msg)
 	// :source INVITE <target> <channel>
 	QString szNick, szUser, szHost;
 	msg->decodeAndSplitPrefix(szNick, szUser, szHost);
+
+	// update the user entry in the database right away
+	KviIrcUserDataBase * db = msg->connection()->userDataBase();
+	KviIrcUserEntry * e = db->find(szNick);
+	if (e)
+	{
+		e->setUser(szUser);
+		e->setHost(szHost);
+	}
 
 	QString szTarget = msg->connection()->decodeText(msg->safeParam(0));
 	QString szChannel = msg->connection()->decodeText(msg->safeParam(1));
@@ -1991,7 +2022,6 @@ void KviIrcServerParser::parseChannelMode(const QString & szNick, const QString 
 {
 	bool bSet = true;
 
-	bool bIsMultiMode = false;
 	bool bIsMultiSingleMode = false;
 	bool bShowAsCompact = false;
 
@@ -2055,7 +2085,6 @@ void KviIrcServerParser::parseChannelMode(const QString & szNick, const QString 
 
 	if(iTotModes > 1)
 	{
-		bIsMultiMode = true;
 		bShowAsCompact = KVI_OPTION_BOOL(KviOption_boolShowCompactModeChanges);
 
 		if(iSingleModes == 1)
@@ -2360,10 +2389,12 @@ void KviIrcServerParser::parseChannelMode(const QString & szNick, const QString 
 		}                                                                                                                                   \
 		if(!(msg->haltOutput() || bShowAsCompact))                                                                                          \
 		{                                                                                                                                   \
+			auto aParamEscaped = aParam;                                                                                                \
+			KviQString::escapeKvs(&aParamEscaped);                                                                                      \
 			chan->output(bSet ? (bIsMe ? icomeset : icoset) : (bIsMe ? icomeunset : icounset),                                              \
 			    __tr2qs("%Q [%Q@%Q] has set mode %c%c \r!m%c%c %Q\r%Q\r"),                                                                  \
 			    &szNickBuffer, &szUser, &szHostBuffer,                                                                                      \
-			    bSet ? '+' : '-', modefl, bSet ? '-' : '+', modefl, &aParam, &aParam);                                                      \
+			    bSet ? '+' : '-', modefl, bSet ? '-' : '+', modefl, &aParamEscaped, &aParam);                                               \
 		}                                                                                                                                   \
 		if(bIsMultiSingleMode)                                                                                                              \
 			iIconForCompactMode = (bSet ? (bIsMe ? icomeset : icoset) : (bIsMe ? icomeunset : icounset));                                   \
@@ -2535,7 +2566,7 @@ void KviIrcServerParser::parseLiteralCap(KviIrcMessage * msg)
 	if(KVS_TRIGGER_EVENT_3_HALTED(KviEvent_OnCap, msg->console(), szPrefix, szCmd, szProtocols))
 		msg->setHaltOutput();
 
-	if(szCmd == "LS")
+	if(szCmd.compare("LS", Qt::CaseInsensitive) == 0)
 	{
 		// :prefix CAP <nickname> LS [*] :<cap1> <cap2> <cap3> ....
 		// All but the last LS messages have the asterisk
@@ -2556,11 +2587,8 @@ void KviIrcServerParser::parseLiteralCap(KviIrcMessage * msg)
 		// We didn't send the request (the user did, or the server sent the reply spontaneously)
 		if(!msg->haltOutput())
 			msg->console()->output(KVI_OUT_CAP, __tr2qs("Server capabilities: %Q"), &szProtocols);
-
-		return;
 	}
-
-	if(szCmd == "ACK")
+	else if(szCmd.compare("ACK", Qt::CaseInsensitive) == 0)
 	{
 		// :prefix CAP <nickname> ACK [*] :<cap1> <cap2> <cap3> ....
 		// All but the last ACK messages have the asterisk
@@ -2581,11 +2609,8 @@ void KviIrcServerParser::parseLiteralCap(KviIrcMessage * msg)
 
 		if(!msg->haltOutput())
 			msg->console()->output(KVI_OUT_CAP, __tr2qs("Capability change acknowledged: %Q"), &szProtocols);
-
-		return;
 	}
-
-	if(szCmd == "NAK")
+	else if(szCmd.compare("NAK", Qt::CaseInsensitive) == 0)
 	{
 		// :prefix CAP <nickname> NAK :<cap1> <cap2> <cap3> ....
 
@@ -2597,11 +2622,8 @@ void KviIrcServerParser::parseLiteralCap(KviIrcMessage * msg)
 
 		if(!msg->haltOutput())
 			msg->console()->output(KVI_OUT_CAP, __tr2qs("Capability change denied: %Q"), &szProtocols);
-
-		return;
 	}
-
-	if(szCmd == "LIST")
+	else if(szCmd.compare("LIST", Qt::CaseInsensitive) == 0)
 	{
 		// :prefix CAP <nickname> LIST [*] :<cap1> <cap2> <cap3> ....
 		// All but the last LIST messages have the asterisk
@@ -2610,11 +2632,8 @@ void KviIrcServerParser::parseLiteralCap(KviIrcMessage * msg)
 
 		if(!msg->haltOutput())
 			msg->console()->output(KVI_OUT_CAP, __tr2qs("Currently enabled capabilities: %Q"), &szProtocols);
-
-		return;
 	}
-
-	if(!msg->haltOutput())
+	else if(!msg->haltOutput())
 		msg->console()->output(KVI_OUT_CAP, __tr2qs("Received unknown extended capability message: %Q %Q"), &szCmd, &szProtocols);
 }
 

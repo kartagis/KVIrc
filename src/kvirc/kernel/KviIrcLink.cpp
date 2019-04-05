@@ -50,21 +50,10 @@ extern KVIRC_API KviIrcServerDataBase * g_pServerDataBase;
 extern KVIRC_API KviProxyDataBase * g_pProxyDataBase;
 
 KviIrcLink::KviIrcLink(KviIrcConnection * pConnection)
-    : QObject()
+    : QObject(), m_pConnection(pConnection)
 {
-	m_pConnection = pConnection;
 	m_pTarget = pConnection->target();
 	m_pConsole = m_pConnection->console();
-
-	m_pSocket = nullptr;
-	m_pLinkFilter = nullptr;
-	m_pResolver = nullptr;
-
-	m_pReadBuffer = nullptr; // incoming data buffer
-	m_uReadBufferLen = 0;    // incoming data buffer length
-	m_uReadPackets = 0;      // total packets read per session
-
-	m_eState = Idle;
 }
 
 KviIrcLink::~KviIrcLink()
@@ -262,7 +251,7 @@ void KviIrcLink::processData(char * buffer, int iLen)
 			if(*cMessageBuffer != 0)
 				m_pConnection->incomingMessage(cMessageBuffer);
 
-			if(m_pSocket->state() != KviIrcSocket::Connected)
+			if(!m_pSocket || (m_pSocket->state() != KviIrcSocket::Connected))
 			{
 				// Disconnected in KviConsoleWindow::incomingMessage() call.
 				// This may happen for several reasons (local event loop
@@ -388,13 +377,13 @@ void KviIrcLink::socketStateChange()
 		case KviIrcSocket::Connecting:
 			m_pConsole->output(KVI_OUT_CONNECTION, __tr2qs("Contacting %Q %s (%s) on port %u"),
 			    connection()->target()->proxy() ? &(__tr2qs("proxy host")) : &(__tr2qs("IRC server")),
-			    connection()->target()->proxy() ? connection()->target()->proxy()->hostName().toUtf8().data() : connection()->target()->server()->hostName().toUtf8().data(),
+			    connection()->target()->proxy() ? connection()->target()->proxy()->hostname().toUtf8().data() : connection()->target()->server()->hostName().toUtf8().data(),
 			    connection()->target()->proxy() ? connection()->target()->proxy()->ip().toUtf8().data() : connection()->target()->server()->ip().toUtf8().data(),
 			    connection()->target()->proxy() ? connection()->target()->proxy()->port() : connection()->target()->server()->port());
 			break;
 		case KviIrcSocket::SSLHandshake:
 			m_pConsole->output(KVI_OUT_CONNECTION, __tr2qs("Low-level transport connection established [%s (%s:%u)]"),
-			    connection()->target()->proxy() ? connection()->target()->proxy()->hostName().toUtf8().data() : connection()->target()->server()->hostName().toUtf8().data(),
+			    connection()->target()->proxy() ? connection()->target()->proxy()->hostname().toUtf8().data() : connection()->target()->server()->hostName().toUtf8().data(),
 			    connection()->target()->proxy() ? connection()->target()->proxy()->ip().toUtf8().data() : connection()->target()->server()->ip().toUtf8().data(),
 			    connection()->target()->proxy() ? connection()->target()->proxy()->port() : connection()->target()->server()->port());
 			m_pConsole->outputNoFmt(KVI_OUT_CONNECTION, __tr2qs("Starting Secure Socket Layer handshake"));
@@ -402,7 +391,7 @@ void KviIrcLink::socketStateChange()
 		case KviIrcSocket::ProxyLogin:
 			m_pConsole->output(KVI_OUT_CONNECTION, __tr2qs("%Q established [%s (%s:%u)]"),
 			    connection()->link()->socket()->usingSSL() ? &(__tr2qs("Secure proxy connection")) : &(__tr2qs("Proxy connection")),
-			    connection()->target()->proxy()->hostName().toUtf8().data(),
+			    connection()->target()->proxy()->hostname().toUtf8().data(),
 			    connection()->target()->proxy()->ip().toUtf8().data(),
 			    connection()->target()->proxy()->port());
 			m_pConsole->outputNoFmt(KVI_OUT_CONNECTION, __tr2qs("Negotiating relay information"));

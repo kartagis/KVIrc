@@ -37,7 +37,7 @@
 #include "KviApplication.h"
 #include "KviQueryWindow.h"
 
-#include <stdlib.h> // rand & srand
+#include <cstdlib> // rand & srand
 
 namespace KviKvsCoreFunctions
 {
@@ -331,9 +331,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(nothing)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setNothing();
 		return true;
 	}
@@ -359,9 +356,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(nullCKEYWORDWORKAROUND)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setHObject(nullptr);
 		return true;
 	}
@@ -384,9 +378,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(o)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setString(QString(QChar(KviControlCodes::Reset)));
 		return true;
 	}
@@ -443,16 +434,13 @@ namespace KviKvsCoreFunctions
 		@description:
 			Returns the [b]window ID[/b] of the query that has <target>
 			in the list of targets and is bound to the connection specified by
-			<irc context id>[br]
+			<irc context id>[br][br]
 			If no window matches the specified target or context, and invalid
 			window ID is returned (0).[br]
 			If no <irc context id> is specified, this function looks for
 			the query in the current connection context (if any).[br]
 			If no <target> is specified, this function returns the current
 			query window ID, if executed in a query, and [b]0[/b] otherwise.[br]
-		@examples:
-			[example]
-			[/example]
 		@seealso:
 			[fnc]$window[/fnc],
 			[fnc]$channel[/fnc],
@@ -516,9 +504,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(r)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setString(QString(QChar(KviControlCodes::Reverse)));
 		return true;
 	}
@@ -540,9 +525,6 @@ namespace KviKvsCoreFunctions
 			$rand is automatically seeded with value of 1.
 			If no <max> is specified, this function returns an integer between
 			0 and RAND_MAX that is system dependent.
-		@examples:
-			[example]
-			[/example]
 		@seealso:
 			[cmd]srand[/cmd]
 	*/
@@ -574,7 +556,7 @@ namespace KviKvsCoreFunctions
 			<real> $real(<data:variant>)
 		@description:
 			Forces <data> to be a [i]real[/i] data type with the following
-			semantics:[br]
+			semantics:
 			[ul]
 				[li]If <data> is a real, <data> itself is returned.[/li]
 				[li]If <data> is an integer, <data> itself is returned, in its real form.[/li]
@@ -684,9 +666,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(receivedBytes)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setInteger(g_uIncomingTraffic);
 		return true;
 	}

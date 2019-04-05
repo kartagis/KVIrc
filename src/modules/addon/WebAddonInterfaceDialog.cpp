@@ -43,7 +43,7 @@ WebAddonInterfaceDialog::WebAddonInterfaceDialog(QWidget * par)
 
 	setPackagePageUrl(
 	    QString::fromLatin1("http://www.kvirc.de/app/addons.php?version=" KVI_VERSION "&lang=%1")
-	        .arg(QString::fromUtf8(KviLocale::instance()->localeName().ptr())));
+	        .arg(KviLocale::instance()->localeName()));
 }
 WebAddonInterfaceDialog::~WebAddonInterfaceDialog()
     = default;
@@ -62,7 +62,7 @@ bool WebAddonInterfaceDialog::packageIsInstalled(const QString & szId, const QSt
 	if(szVersion.isEmpty())
 		return true; // hum.... shouldn't happen ?
 
-	// FIXME: If the version of the installed addon is lower then allow upgrading!
+	// FIXME: If the version of the installed addon is lower than allow upgrading!
 	return KviMiscUtils::compareVersions(pAddon->version(), szVersion) < 0;
 }
 

@@ -49,7 +49,7 @@
 
 #include <QFile>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 
 #ifdef COMPILE_ESD_SUPPORT
 #include <esd.h>
@@ -210,22 +210,12 @@ bool KviSoundPlayer::event(QEvent * e)
 
 void KviSoundPlayer::detectSoundSystem()
 {
-#ifdef COMPILE_PHONON_SUPPORT
-	// FIXME: Phonon seems to freeze on windows sometimes.. maybe it's better to auto-detect winmm ?
-	if(!m_pPhononPlayer)
-		m_pPhononPlayer = Phonon::createPlayer(Phonon::MusicCategory);
-	if(m_pPhononPlayer->state() != Phonon::ErrorState)
-	{
-		KVI_OPTION_STRING(KviOption_stringSoundSystem) = "phonon";
-		return;
-	}
-#endif
 #if defined(COMPILE_ON_WINDOWS) || defined(COMPILE_ON_MINGW)
 	KVI_OPTION_STRING(KviOption_stringSoundSystem) = "winmm";
 #else
 #ifdef COMPILE_ESD_SUPPORT
 	esd_format_t format = ESD_BITS16 | ESD_STREAM | ESD_PLAY | ESD_MONO;
-	int esd_fd = esd_play_stream(format, 8012, NULL, "kvirc");
+	int esd_fd = esd_play_stream(format, 8012, nullptr, "kvirc");
 	if(esd_fd >= 0)
 	{
 		KVI_OPTION_STRING(KviOption_stringSoundSystem) = "esd";
@@ -288,7 +278,7 @@ void KviSoundPlayer::cleanupPhonon()
 #if defined(COMPILE_ON_WINDOWS) || defined(COMPILE_ON_MINGW)
 bool KviSoundPlayer::playWinmm(const QString & szFileName)
 {
-	sndPlaySound(szFileName.toLocal8Bit().data(), SND_ASYNC | SND_NODEFAULT);
+	sndPlaySound(szFileName.toStdWString().c_str(), SND_ASYNC | SND_NODEFAULT);
 	return true;
 }
 
@@ -567,7 +557,6 @@ void KviOssSoundThread::play()
 	int fd = -1;
 	char buf[OSS_BUFFER_SIZE];
 	int iDataLen = 0;
-	int iSize = 0;
 
 	if(!f.open(QIODevice::ReadOnly))
 	{
@@ -575,7 +564,7 @@ void KviOssSoundThread::play()
 		return;
 	}
 
-	iSize = f.size();
+	int iSize = f.size();
 
 	if(iSize < 24)
 	{
@@ -636,7 +625,7 @@ void KviOssSoundThread::play()
 
 exit_thread:
 	f.close();
-	if(fd > 0)
+	if(fd >= 0)
 		close(fd);
 }
 
@@ -656,7 +645,7 @@ KviEsdSoundThread::~KviEsdSoundThread()
 void KviEsdSoundThread::play()
 {
 	// ESD has a really nice API
-	if(!esd_play_file(NULL, m_szFileName.toUtf8().data(), 1)) // this is sync.. FIXME: it can't be stopped!
+	if(!esd_play_file(nullptr, m_szFileName.toUtf8().data(), 1)) // this is sync.. FIXME: it can't be stopped!
 		qDebug("Could not play sound %s! [ESD]", m_szFileName.toUtf8().data());
 }
 

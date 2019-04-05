@@ -1,3 +1,34 @@
+01.01.2019: Release 5.0.0 "Aria"
+###############################################################################
+
+It took quite some time, but here it is: an official stable 5.0.0.
+
+Since the beta1 release several bugs were fixed and the codebase has been
+polished a quite lot. The last stable release was more than six years ago,
+so the changes are really too many to be listed. You're encouraged to upgrade
+and just try it out.
+
+Most prominent contributors to this release are IceN9ne, wodim, Stanzilla,
+DarthGandalf, Dessa, staticfox, AndrioCelos and craftwar: Honor and Glory! :)
+As usual, developers hang around #kvirc@Freenode. Come in and say hi!
+
+Have fun!
+Szymon Stefanek and The KVIrc Development Team
+
+
+29.12.2017: Release 5.0.0-beta1
+###############################################################################
+
+After some years and a couple of alpha releases we have a beta.
+Well.. it's marked "beta" but you'll probably find it pretty much stable.
+Several people have worked on the codebase and ultimately on this release.
+Many of them hang daily around #kvirc@Freenode. Come and say hi! :)
+
+Have fun!
+Szymon Stefanek and The KVIrc Development Team
+
+
+
 01.07.2012: Release 4.2.0 "Equilibrium"
 ###############################################################################
 
@@ -52,7 +83,7 @@ Here we go again: 4.0.4 is ready.
 
 This is mainly a bugfix release.
 
-Configuration from existing 4.0.0/4.0.2 installations will be completly preserved
+Configuration from existing 4.0.0/4.0.2 installations will be completely preserved
 and everyone is encouraged to upgrade.
 
 As usual, the bugs for this release should be reported by using the bugtrack
@@ -73,7 +104,7 @@ even if we have tested it thoroughly some problems still managed to escape our
 attention. There are fixes for several minor annoyances and the very important
 patch for a security issue related to DCC handshakes (secunia advisory SA40727)
 
-Configuration from existing 4.0.0 installations will be completly preserved
+Configuration from existing 4.0.0 installations will be completely preserved
 and everyone is encouraged to upgrade.
 
 As usual, the bugs for this release should be reported by using the bugtrack
@@ -239,7 +270,7 @@ we obviously also have a huge number of bugfixes.
 
 This will be the last stable release of the 3.* series and also the last
 one using Qt3. From now on we'll be working on major version 4 and
-switching completly to Qt4. This release actually contains a preliminary
+switching completely to Qt4. This release actually contains a preliminary
 Qt4 support and if you feel brave you might test it by passing
 the "hidden" --enable-qt swtich to configure.
 
@@ -472,7 +503,7 @@ and we will release them as separate packages.
 On the CVS you can already find the "nap" module that allows chatting (no file sharing yet)
 on OpenNap networks.
 
-The scriptcenter dialog has been splitted in smaller "pieces" and a GUI toolbar editor has been added.
+The scriptcenter dialog has been split in smaller "pieces" and a GUI toolbar editor has been added.
 
 Finally there are tons of bugfixes and improvements: just play with it :)
 

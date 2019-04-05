@@ -69,10 +69,10 @@ namespace KviKvsCoreSimpleCommands
 			The switch -x will make say evaluate and execute arbitrary commands, too:
 			if <text> begins with a slash then it will be treated as a command
 			to be evaluated and executed (after parsing the identifiers etc.).[br]
-			If this happens, the executed command will not be send to the active channel.[br]
+			If this happens, the executed command will not be send to the active channel.
 			[example]
 				/say -x /[cmd]echo[/cmd] foo
-			[/example][br]
+			[/example]
 			will just print "foo".[br]
 			Please note that using /say -x with a <text> that isn't a constant
 			in the script but comes from some unidentified external source (e.g. the network)
@@ -152,6 +152,7 @@ namespace KviKvsCoreSimpleCommands
 			entry too).
 			!sw: -s | --ssl
 			Activates the SSL support for this connection (if OpenSSL support has been compiled in).
+			If SSL is enabled and no port is specified, the connection will be made to port 6697.
 			!sw: -u | --unused-context
 			Forces the connection to be attempted in the first IRC context that has
 			no connection in progress. If all the IRC contexts have connections in progress
@@ -288,6 +289,8 @@ namespace KviKvsCoreSimpleCommands
 			d->bUseSSL = (KVSCSC_pSwitches->find('s', "ssl") != nullptr);
 			d->bSTARTTLS = false;
 			d->szServer = szServer;
+			// if the user wants to connect using ssl but didn't specify a port, default to 6697
+			if (d->bUseSSL && !(uPort > 0))uPort = 6697;
 			d->uPort = (kvi_u32_t)uPort;
 			d->szLinkFilter = szSocketFilter;
 			d->bPortIsOk = (uPort > 0);
@@ -440,8 +443,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(setreturn)
 	{
-		Q_UNUSED(__pSwitches);
-
 		if(KVSCSC_pParams->count() == 0)
 		{
 			KVSCSC_pContext->returnValue()->setNothing();
@@ -518,11 +519,7 @@ namespace KviKvsCoreSimpleCommands
 		else
 		{
 			QByteArray szT = KVSCSC_pConnection->encodeText(szTarget);
-			QByteArray szD = w ? w->encodeText(szText) : KVSCSC_pConnection->encodeText(szText);
-			if(!szT.data())
-				szT = ""; // encoding problems ?
-			if(!szD.data())
-				szD = ""; // encoding problems ?
+			QByteArray szD = KVSCSC_pConnection->encodeText(szText);
 
 			if(!(KVSCSC_pConnection->sendFmtData("SQUERY %s :%s", szT.data(), szD.data())))
 				return KVSCSC_pContext->warningNoIrcConnection();
@@ -572,7 +569,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(srand)
 	{
-		Q_UNUSED(__pSwitches);
 		QString tmp;
 
 		for(int i = 0; i < 10; i++)
@@ -645,8 +641,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(topic)
 	{
-		Q_UNUSED(__pSwitches);
-
 		QString szChannel;
 		QString szTopic;
 		KVSCSC_PARAMETERS_BEGIN
@@ -937,8 +931,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(warning)
 	{
-		Q_UNUSED(__pSwitches);
-
 		QString szAll;
 		KVSCSC_pParams->allAsString(szAll);
 		KVSCSC_pContext->warning("%Q", &szAll);
@@ -965,8 +957,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(wallops)
 	{
-		Q_UNUSED(__pSwitches);
-
 		QString szMessage;
 		KVSCSC_PARAMETERS_BEGIN
 		KVSCSC_PARAMETER("message", KVS_PT_NONEMPTYSTRING, KVS_PF_APPENDREMAINING, szMessage)
@@ -1001,7 +991,7 @@ namespace KviKvsCoreSimpleCommands
 			a much more complex syntax: <mask1> <options> [<mask2>].
 			<mask1> is a comma separated list of filters that can contain wildcards (* and ?),
 			<options> is a set of characters specifying what <mask1> is matching (nicknames, channel
-			names, user names, real names, IP addresses etc) and what kind of informations should be returned.
+			names, user names, real names, IP addresses etc) and what kind of information should be returned.
 			Look for the extended WHOX syntax on your favorite search engine.[br]
 			If no parameter is specified at all, it requests a WHO information about the current
 			channel.[br]
@@ -1019,8 +1009,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(who)
 	{
-		Q_UNUSED(__pSwitches);
-
 		QString szData;
 		KVSCSC_PARAMETERS_BEGIN
 		KVSCSC_PARAMETER("filter", KVS_PT_NONEMPTYSTRING, KVS_PF_OPTIONAL | KVS_PF_APPENDREMAINING, szData)
@@ -1080,8 +1068,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(whois)
 	{
-		Q_UNUSED(__pSwitches);
-
 		QString szNick;
 		KVSCSC_PARAMETERS_BEGIN
 		KVSCSC_PARAMETER("nickname", KVS_PT_NONEMPTYSTRING, KVS_PF_APPENDREMAINING, szNick)
@@ -1122,8 +1108,6 @@ namespace KviKvsCoreSimpleCommands
 
 	KVSCSC(whowas)
 	{
-		Q_UNUSED(__pSwitches);
-
 		QString szNick;
 		KVSCSC_PARAMETERS_BEGIN
 		KVSCSC_PARAMETER("nickname", KVS_PT_NONEMPTYSTRING, KVS_PF_APPENDREMAINING, szNick)

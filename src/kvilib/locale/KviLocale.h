@@ -64,14 +64,14 @@ public:
 	* \struct _EncodingDescription
 	* \brief Holds the encoding data
 	*/
-	typedef struct _EncodingDescription
+	struct EncodingDescription
 	{
 		const char * pcName;        /**< name of the encoding */
 		char bSmart;                /**< is it a smart codec? */
 		char bSendUtf8;             /**< does it send utf8 or the local charset? */
 		uint uGroup;                /**< group */
 		const char * pcDescription; /**< description of the encoding */
-	} EncodingDescription;
+	};
 
 protected:
 	/**
@@ -90,7 +90,7 @@ protected:
 	~KviLocale();
 
 public:
-	static KviCString g_szLang;
+	static QString g_szLang;
 
 protected:
 	QApplication * m_pApp;
@@ -148,9 +148,9 @@ public:
 
 	/**
 	* \brief Returns the language code of the localization
-	* \return const KviCString &
+	* \return const QString &
 	*/
-	const KviCString & localeName() { return g_szLang; }
+	const QString & localeName() const { return g_szLang; }
 
 	/**
 	* \brief Returns the codec associated to the given translation

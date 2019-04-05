@@ -58,7 +58,7 @@
 #include <QCheckBox>
 #include <QMenu>
 
-#include <limits.h> //for INT_MAX
+#include <climits> //for INT_MAX
 
 extern LogViewWindow * g_pLogViewWindow;
 
@@ -400,6 +400,9 @@ filter_last:
 		m_pListView->sortItems(0, Qt::AscendingOrder);
 		m_pProgressBar->setValue(0);
 		m_pFilterButton->setEnabled(true);
+
+		// Reset m_szLastGroup for next search
+		m_szLastGroup = "";
 	}
 }
 
@@ -736,7 +739,7 @@ void LogViewWindow::createLog(LogFile * pLog, int iId, QString * pszFile)
 				// insert msgtype icon at start of the current text line
 				KviMessageTypeSettings msg(KVI_OPTION_MSGTYPE(iMsgType));
 				QString szIcon = g_pIconManager->getSmallIconResourceName((KviIconManager::SmallIcon)msg.pixId());
-				szTmp.prepend("<img src=\"" + szIcon + "\" alt=\"\" /> ");
+				szTmp.prepend("<img src=\"" + szIcon + R"(" alt="" /> )");
 
 				/*
 				 * Check if the nick who has talked is the same of the above line.

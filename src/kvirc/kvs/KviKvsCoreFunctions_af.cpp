@@ -168,7 +168,9 @@ namespace KviKvsCoreFunctions
 			will first encode the string in UTF-8 and then base64-encode.
 			This means that it is substantially only 7-bit safe (ASCII codes below 128).
 		@examples:
-			[cmd]echo[/cmd] $asciiToBase64("Hello!")
+			[example]
+				[cmd]echo[/cmd] $asciiToBase64("Hello!")
+			[/example]
 		@seealso:
 			[fnc]$base64toascii[/fnc]
 	*/
@@ -210,7 +212,9 @@ namespace KviKvsCoreFunctions
 			will first encode the string in UTF-8 and then hex-encode.
 			This means that it is substantially only 7bit safe (ASCII codes below 128).
 		@examples:
-			[cmd]echo[/cmd] $asciiToHex("Hello!")
+			[example]
+				[cmd]echo[/cmd] $asciiToHex("Hello!")
+			[/example]
 		@seealso:
 			[fnc]$hextoascii[/fnc]
 	*/
@@ -266,8 +270,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(array)
 	{
-		Q_UNUSED(__pContext);
-
 		KviKvsArray * a = new KviKvsArray();
 
 		for(KviKvsVariant * v = KVSCF_pParams->first(); v; v = KVSCF_pParams->next())
@@ -347,9 +349,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(b)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setString(QString(QChar(KviControlCodes::Bold)));
 		return true;
 	}
@@ -454,7 +453,7 @@ namespace KviKvsCoreFunctions
 		@description:
 			Returns the requested information about local certificate.[br]
 			Some queries can accept an optional parameter <param1>.[br]
-			Available query strings are:[br]
+			Available query strings are:
 			[ul]
 				[li]signatureType[/li]
 				[li]signatureContents[/li]
@@ -789,9 +788,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(countStatusBarItems)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		if(g_pMainWindow->mainStatusBar())
 		{
 			QList<QWidget *> widgets = g_pMainWindow->mainStatusBar()->findChildren<QWidget *>();
@@ -820,9 +816,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(cr)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setString(QString(QChar('\r')));
 		return true;
 	}
@@ -843,7 +836,7 @@ namespace KviKvsCoreFunctions
 			Returns the string representation of <unixtime> or
 			of the current time if <unixtime> is not given, based on <format>.[br]
 			The <format string> should contain a set of characters
-			that will be transformed according to the following rules:[br]
+			that will be transformed according to the following rules:
 			[table]
 				[tr][td][b]a[/b][/td][td]The abbreviated weekday name according to the current locale.[/td][/tr]
 				[tr][td][b]A[/b][/td][td]The full weekday name according to the current locale.[/td][/tr]
@@ -1168,9 +1161,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(falseCKEYWORDWORKAROUND)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setBoolean(false);
 		return true;
 	}
@@ -1199,8 +1189,8 @@ namespace KviKvsCoreFunctions
 				%i = %myfeats[]#
 				[cmd]while[/cmd](%i > 0)
 				{
-					[cmd]echo[/cmd] "Supporting feature %myfeats[%i]"
 					%i--;
+					[cmd]echo[/cmd] "Supporting feature %myfeats[%i]"
 				}
 			[/example]
 			Nearly the same loop, just really shorter:
@@ -1212,7 +1202,7 @@ namespace KviKvsCoreFunctions
 			[example]
 				[cmd]if[/cmd]($features("SSL"))[cmd]echo[/cmd] "Yes! SSL is available";
 			[/example]
-			If used in [i]non-array[/i] context it returns just a comma separated list of entries:[br]
+			If used in [i]non-array[/i] context it returns just a comma separated list of entries:
 			[example]
 				[cmd]echo[/cmd] $features
 			[/example]
@@ -1259,9 +1249,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(firstConnectedConsole)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KviConsoleWindow * c = g_pApp->topmostConnectedConsole();
 		KVSCF_pRetBuffer->setInteger(c ? c->numericId() : 0);
 		return true;
@@ -1292,8 +1279,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(flatten)
 	{
-		Q_UNUSED(__pContext);
-
 		KviKvsArray * a = new KviKvsArray();
 		KVSCF_pRetBuffer->setArray(a);
 		unsigned int uIdx = 0;

@@ -85,7 +85,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(scriptContextName)
 	{
-		Q_UNUSED(__pParams);
 		KVSCF_pRetBuffer->setString(KVSCF_pContext->script()->name());
 		return true;
 	}
@@ -132,9 +131,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(sentBytes)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setInteger(g_uOutgoingTraffic);
 		return true;
 	}
@@ -480,8 +476,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(thisCKEYWORDWORKAROUND)
 	{
-		Q_UNUSED(__pParams);
-
 		// prologue: parameter handling
 		KviKvsObject * o = KVSCF_pContext->thisObject();
 		KVSCF_pRetBuffer->setHObject(o ? o->handle() : ((kvs_hobject_t) nullptr));
@@ -503,7 +497,6 @@ namespace KviKvsCoreFunctions
 			software is called localization. KVIrc offers some commands
 			and functions for this purpose and this document explains
 			briefly how to use them.
-			[br]
 			[big]The big picture[/big]
 			[br]
 			All of the strings in your script are written in a [i]primary language[/i].
@@ -519,7 +512,6 @@ namespace KviKvsCoreFunctions
 			The binary form translations are then loaded in the KVIrc
 			executable at runtime and a function is used to look up the
 			translations.
-			[br][br]
 			[big]How to translate scripts[/big]
 			[br]
 			Your strings should be surrounded by the [fnc]$tr[/fnc]() function in the following way:
@@ -528,17 +520,17 @@ namespace KviKvsCoreFunctions
 			[/example]
 			[br]
 			Then you should run the xgettext command on your script files.
-			This is done by a shell commandline similar to the following:[br]
+			This is done by a shell commandline similar to the following:
 			[example]
 				xgettext -o myscript.pot -ktr mykvsfile1.kvs mykvsfile2.kvs ...
 			[/example]
 			[br]
-			Copy the translation file obtained in the following way:[br]
+			Copy the translation file obtained in the following way:
 			[example]
-				cp myscript.pot myscript_XX.pot
-			[/example][br]
+				cp myscript.pot myscript_XX.po
+			[/example]
 			Where the XX is your country/language code. For example, for Italian
-			it would be:[br]
+			it would be:
 			[example]
 				cp myscript.pot myscript_it.po
 			[/example]
@@ -550,19 +542,19 @@ namespace KviKvsCoreFunctions
 			msgid "your default language text"
 			msgstr "il tuo testo in linguaggio predefinito"
 			[br]
-			Compile your translation to binary form with the following command:[br]
+			Compile your translation to binary form with the following command:
 			[example]
 				msgfmt -o myscript_it.mo myscript_it.po
-			[/example][br]
+			[/example]
 			Copy the generated *.mo file to the [i]locale[/i] subdirectory
 			in the KVIrc's local directory (usually $HOME/.kvirc/locale/).
 			[br]
-			Set the system language to the XX above with the following command:[br]
+			Set the system language to the XX above with the following command:
 			[example]
 				export LANG="XX"
-			[/example][br]
-			For Italian it would be:[br]
-			[example]export LANG="it"[/example][br]
+			[/example]
+			For Italian it would be:
+			[example]export LANG="it"[/example]
 			[br]
 			Start KVIrc and type in the commandline:
 			[example]
@@ -579,7 +571,6 @@ namespace KviKvsCoreFunctions
 			The right *.mo file will be magically loaded by KVIrc that
 			will look up the user's LANG variable. (If you don't want
 			to use LANG, you can use KVIRC_LANG instead, it will still work).
-			[br][br]
 			[big]Caveats[/big]
 			[br]
 			You should [b]never[/b] use variables or identifiers inside the $tr() function.
@@ -720,9 +711,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(trueCKEYWORDWORKAROUND)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setBoolean(true);
 		return true;
 	}
@@ -784,9 +772,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(u)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setString(QString(QChar(KviControlCodes::Underline)));
 		return true;
 	}
@@ -907,9 +892,6 @@ namespace KviKvsCoreFunctions
 
 	KVSCF(unixtime)
 	{
-		Q_UNUSED(__pContext);
-		Q_UNUSED(__pParams);
-
 		KVSCF_pRetBuffer->setInteger((kvs_int_t)(time(nullptr)));
 		return true;
 	}
@@ -1016,7 +998,7 @@ namespace KviKvsCoreFunctions
 			<string> $version(<type:string>)
 		@description:
 			Returns information about the version of the currently running KVIrc.[br]
-			Type can be one of:[br]
+			Type can be one of:
 			[ul]
 			[li]a: return the application name[/li]
 			[li]b: return the build date in human readable form[/li]

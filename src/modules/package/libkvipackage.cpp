@@ -37,7 +37,7 @@
 #include <QFile>
 #include <QFileInfo>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 static QString createRandomDir()
 {
@@ -69,11 +69,11 @@ static QString createRandomDir()
 	@title:
 		$package.info
 	@short:
-		Returns informations about a KVIrc package file
+		Returns information about a KVIrc package file
 	@syntax:
 		<hash> $package.info(<package_path:string>)
 	@description:
-		Returns a set of informations about a KVIrc package file (*.kvt or *.kva).
+		Returns a set of information about a KVIrc package file (*.kvt or *.kva).
 		The set is a structured hash.
 		If the specified path does not lead to a valid KVIrc package
 		the returned hash will contain a single element with key "error".
@@ -154,7 +154,7 @@ static bool package_kvs_fnc_info(KviKvsModuleFunctionCall * c)
 
 	QStringList sl = KviFileUtils::getFileListing(szUnpackPath);
 
-	Q_FOREACH(QString fn, sl)
+	for(const auto & fn : sl)
 		pFilesArray->append(new KviKvsVariant(fn));
 
 	// delete the random tmp dir

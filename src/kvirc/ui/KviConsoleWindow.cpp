@@ -280,7 +280,7 @@ void KviConsoleWindow::getUserTipText(const QString & nick, KviIrcUserEntry * e,
 
 	if(e->avatar())
 	{
-		buffer += QString(nrs + "<center><img src=\"%1\" width=\"%2\"></center>" + enr).arg(e->avatar()->localPath()).arg(e->avatar()->size().width());
+		buffer += QString(nrs + R"(<center><img src="%1" width="%2"></center>)" + enr).arg(e->avatar()->localPath()).arg(e->avatar()->size().width());
 	}
 
 	if(e->hasRealName())
@@ -340,7 +340,7 @@ void KviConsoleWindow::getUserTipText(const QString & nick, KviIrcUserEntry * e,
 
 		if(e->hasHops())
 		{
-			buffer += "<tr><td bgcolor=\"#E0E0E0\"><font color=\"#000000\">";
+			buffer += R"(<tr><td bgcolor="#E0E0E0"><font color="#000000">)";
 			buffer += __tr2qs("Hops: <b>%1</b>").arg(e->hops());
 			buffer += "</font>" + enr;
 		}
@@ -353,14 +353,14 @@ void KviConsoleWindow::getUserTipText(const QString & nick, KviIrcUserEntry * e,
 
 	if(e->hasAccountName())
 	{
-		buffer += "<tr><td bgcolor=\"#E0E0E0\"><font color=\"#000000\">";
+		buffer += R"(<tr><td bgcolor="#E0E0E0"><font color="#000000">)";
 		buffer += __tr2qs("Identified to account: <b>%1</b>").arg(e->accountName());
 		buffer += "</font>" + enr;
 	}
 
 	if(e->isAway())
 	{
-		buffer += "<tr><td width=\"100%\" bgcolor=\"#E0E0E0\"><font color=\"#000000\">";
+		buffer += R"(<tr><td width="100%" bgcolor="#E0E0E0"><font color="#000000">)";
 		buffer += __tr2qs("Probably away");
 		buffer += "</font>" + enr;
 	}
@@ -594,7 +594,10 @@ int KviConsoleWindow::triggerOnHighlight(KviWindow * pWnd, int iType, const QStr
 			return iType;
 	}
 	if(!KVI_OPTION_STRING(KviOption_stringOnHighlightedMessageSound).isEmpty() && pWnd && !pWnd->hasAttention())
-		KviKvsScript::run("snd.play $0", nullptr, new KviKvsVariantList(new KviKvsVariant(KVI_OPTION_STRING(KviOption_stringOnHighlightedMessageSound))));
+	{
+		KviKvsVariantList soundParams{new KviKvsVariant{KVI_OPTION_STRING(KviOption_stringOnHighlightedMessageSound)}};
+		KviKvsScript::run("snd.play $0", nullptr, &soundParams);
+	}
 
 	QString szMessageType = QString("%1").arg(iType);
 
@@ -796,13 +799,13 @@ void KviConsoleWindow::outputPrivmsg(KviWindow * wnd,
 					if(KVI_OPTION_BOOL(KviOption_boolUseSpecifiedSmartColorForOwnNick))
 					{
 						//avoid the use of the color specifier for own nickname
-						if(m_szOwnSmartColor == KviNickColors::getSmartColor(sum))
+						if(m_szOwnSmartColor == KviNickColors::getSmartColor(sum, KVI_OPTION_BOOL(KviOption_boolColorNicksWithBackground)))
 							sum++;
 					}
 					pUserEntry->setSmartNickColor(sum);
 				}
 
-				szNick.prepend(KviNickColors::getSmartColor(sum));
+				szNick.prepend(KviNickColors::getSmartColor(sum, KVI_OPTION_BOOL(KviOption_boolColorNicksWithBackground)));
 			}
 			else
 			{
@@ -816,10 +819,10 @@ void KviConsoleWindow::outputPrivmsg(KviWindow * wnd,
 				if(KVI_OPTION_BOOL(KviOption_boolUseSpecifiedSmartColorForOwnNick))
 				{
 					//avoid the use of the color specifier for own nickname
-					if(m_szOwnSmartColor == KviNickColors::getSmartColor(sum))
+					if(m_szOwnSmartColor == KviNickColors::getSmartColor(sum, KVI_OPTION_BOOL(KviOption_boolColorNicksWithBackground)))
 						sum++;
 				}
-				szNick.prepend(KviNickColors::getSmartColor(sum));
+				szNick.prepend(KviNickColors::getSmartColor(sum, KVI_OPTION_BOOL(KviOption_boolColorNicksWithBackground)));
 			}
 		}
 		szNick.prepend(KviControlCodes::Color);
@@ -1303,7 +1306,7 @@ void KviConsoleWindow::getWindowListTipText(QString & buffer)
 		buffer += tspan;
 		buffer += html_eofbold;
 
-		buffer += enr + "<tr><td bgcolor=\"#E0E0E0\"><font color=\"#000000\">";
+		buffer += enr + R"(<tr><td bgcolor="#E0E0E0"><font color="#000000">)";
 
 		tspan = KviTimeUtils::formatTimeInterval((unsigned int)(kvi_secondsSince(connection()->statistics()->lastMessageTime())),
 		    KviTimeUtils::NoLeadingEmptyIntervals | KviTimeUtils::NoLeadingZeroes);

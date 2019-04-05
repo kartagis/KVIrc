@@ -192,7 +192,7 @@ SetupWizard::SetupWizard()
 	ed->setWordWrapMode(QTextOption::NoWrap);
 	QString szLicense;
 	QString szLicensePath;
-	g_pApp->getGlobalKvircDirectory(szLicensePath, KviApplication::License, "COPYING");
+	g_pApp->getGlobalKvircDirectory(szLicensePath, KviApplication::License, "ABOUT-LICENSE");
 	if(!KviFileUtils::loadFile(szLicensePath, szLicense))
 	{
 		szLicense = __tr("Oops! Can't find the license file.\n"
@@ -544,7 +544,7 @@ SetupWizard::SetupWizard()
 	HKEY hKey;
 	QString szMircDir;
 
-	if(RegOpenKeyEx(HKEY_CLASSES_ROOT, "ChatFile\\DefaultIcon", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+	if(RegOpenKeyEx(HKEY_CLASSES_ROOT, TEXT("ChatFile\\DefaultIcon"), 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 	{
 		if(RegQueryValueEx(hKey, 0, 0, 0, (LPBYTE)buffer, &len) == ERROR_SUCCESS)
 		{
@@ -802,11 +802,11 @@ void SetupWizard::makeLink()
 
 	// Dig in the registry looking up the Desktop path
 	if(RegOpenKeyEx(HKEY_CURRENT_USER,
-	       "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
+	       TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders"),
 	       0, KEY_QUERY_VALUE, &hCU)
 	    == ERROR_SUCCESS)
 	{
-		RegQueryValueEx(hCU, "Desktop", NULL, &lpType,
+		RegQueryValueEx(hCU, TEXT("Desktop"), nullptr, &lpType,
 		    (unsigned char *)&szLink, &ulSize);
 		RegCloseKey(hCU);
 	}
@@ -819,13 +819,13 @@ void SetupWizard::makeLink()
 	szKvircExec.append("\\kvirc.exe");
 
 	// Trigger a horrible machinery
-	CoInitialize(NULL); // we need COM+OLE
+	CoInitialize(nullptr); // we need COM+OLE
 
 	// Fiddle with an obscure shell interface
 	IShellLink * psl;
 
 	// Get a pointer to the IShellLink interface: this is kinda ugly :)
-	if(CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER,
+	if(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER,
 	       IID_IShellLink, (void **)&psl)
 	    == S_OK)
 	{
@@ -839,9 +839,9 @@ void SetupWizard::makeLink()
 		{
 			WORD wsz[MAX_PATH];
 			// Set the path to the shell link target.
-			psl->SetPath(QTextCodec::codecForLocale()->fromUnicode(szKvircExec).data());
+			psl->SetPath(szKvircExec.toStdWString().c_str());
 			// Set the description of the shell link.
-			psl->SetDescription("kvirc");
+			psl->SetDescription(TEXT("kvirc"));
 			// Ensure string is ANSI.
 			MultiByteToWideChar(CP_ACP, 0, QTextCodec::codecForLocale()->fromUnicode(szLinkTarget).data(), -1, (LPWSTR)wsz, MAX_PATH);
 			// Save the link via the IPersistFile::Save method.
@@ -1019,9 +1019,7 @@ void SetupWizard::accept()
 		// Make local->global link
 		QString localPath = QString("%1/global").arg(g_pApp->m_szLocalKvircDir);
 		unlink(QTextCodec::codecForLocale()->fromUnicode(localPath).data());
-		int dummy; // make gcc happy
-		dummy = symlink(QTextCodec::codecForLocale()->fromUnicode(g_pApp->m_szGlobalKvircDir).data(), QTextCodec::codecForLocale()->fromUnicode(localPath).data());
-		Q_UNUSED(dummy);
+		(void)symlink(QTextCodec::codecForLocale()->fromUnicode(g_pApp->m_szGlobalKvircDir).data(), QTextCodec::codecForLocale()->fromUnicode(localPath).data());
 #endif
 
 #ifdef COMPILE_KDE_SUPPORT

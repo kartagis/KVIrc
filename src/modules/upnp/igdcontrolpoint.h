@@ -61,7 +61,7 @@ namespace UPnP
 		// The constructor
 		IgdControlPoint(const QString & hostname, int port, const QString & rootUrl);
 		// The destructor
-		virtual ~IgdControlPoint();
+		~IgdControlPoint();
 
 		// Return the external IP address
 		QString getExternalIpAddress() const;
@@ -81,7 +81,7 @@ namespace UPnP
 		// A WAN connection query was finished
 		void slotWanQueryFinished(bool error);
 
-	private: // private attibutes
+	private: // private attributes
 		// Is a gateway available?
 		bool m_bGatewayAvailable;
 		// The host of the gateway

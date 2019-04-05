@@ -74,7 +74,7 @@ void KviApplication::getGlobalKvircDirectory(QString & szData, KvircSubdir dir, 
 			szData.append("help");
 			{
 				// Localized help
-				QString tmp(KviLocale::instance()->localeName().ptr());
+				QString tmp = KviLocale::instance()->localeName();
 				tmp.prepend(KVI_PATH_SEPARATOR_CHAR);
 				tmp.prepend(szData);
 				if(KviFileUtils::directoryExists(tmp))
@@ -227,7 +227,7 @@ void KviApplication::getLocalKvircDirectory(QString & szData, KvircSubdir dir, c
 			szData.append("help");
 			{
 				// Localized help
-				QString tmp = KviLocale::instance()->localeName().ptr();
+				QString tmp = KviLocale::instance()->localeName();
 				tmp.prepend(KVI_PATH_SEPARATOR_CHAR);
 				tmp.prepend(szData);
 				if(KviFileUtils::directoryExists(tmp))
@@ -313,7 +313,7 @@ void KviApplication::getTmpFileName(QString & szBuffer, const QString & szEnding
 	KviQString::ensureLastCharIs(tmp, KVI_PATH_SEPARATOR_CHAR);
 
 	struct timeval tmv;
-	kvi_gettimeofday(&tmv, nullptr);
+	kvi_gettimeofday(&tmv);
 
 	QString szFileName = szEndingFileName.isNull() ? QString("file.tmp") : szEndingFileName;
 	do
@@ -443,7 +443,7 @@ bool KviApplication::mapImageFile(QString & szRetPath, const QString & filename)
 
 	QString szBestMatch;
 
-	while(szRetPath.indexOf(KVI_PATH_SEPARATOR) != -1)
+	while(szRetPath.contains(KVI_PATH_SEPARATOR))
 	{
 		KviQString::cutToFirst(szRetPath, KVI_PATH_SEPARATOR);
 

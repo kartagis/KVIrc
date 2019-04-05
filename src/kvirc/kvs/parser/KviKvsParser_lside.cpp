@@ -52,8 +52,7 @@
 		Some operators, like arithmetic ones, are typically used inside the special function
 		[b]$(<expression>)[/b], called the [i][doc:expressioneval]Expression evaluation identifier[/doc][/i];
 		This special function returns the result of the evaluation of the <expression>.
-		In previous versions of KVIrc this function was called $calc().[br]
-		[br]
+		In previous versions of KVIrc this function was called $calc().
 		[table]
 			[tr][td]Operator[/td][td]document[/td][/tr]
 			[tr][td]=[/td][td][doc:assignment]assignment operator[/doc][/td][/tr]
@@ -628,6 +627,7 @@ KviKvsTreeNodeOperation * KviKvsParser::parseBindingOperation()
 	{
 		error(KVSP_curCharPointer, __tr2qs_ctx("Unexpected end of command in binding operation, at least one slash is missing", "kvs"));
 		delete pFirst;
+		delete pSecond;
 		return nullptr;
 	}
 
@@ -635,6 +635,7 @@ KviKvsTreeNodeOperation * KviKvsParser::parseBindingOperation()
 	{
 		error(KVSP_curCharPointer, __tr2qs_ctx("Found character '%q' (Unicode %x) where a slash '/' was expected", "kvs"), KVSP_curCharPointer, KVSP_curCharUnicode);
 		delete pFirst;
+		delete pSecond;
 		return nullptr;
 	}
 
@@ -668,6 +669,10 @@ KviKvsTreeNodeOperation * KviKvsParser::parseBindingOperation()
 		// regexp substitution s/szFirst/szSecond/szFlags
 		return new KviKvsTreeNodeOperationStringSubstitution(pBegin, pFirst, pSecond, pThird);
 	}
+
+	delete pFirst;
+	delete pSecond;
+	delete pThird;
 
 	error(KVSP_curCharPointer, __tr2qs_ctx("Unknown binding operation '%Q'", "kvs"), &szOp);
 	return nullptr;
@@ -894,11 +899,11 @@ KviKvsTreeNodeOperation * KviKvsParser::parseOperation()
 				if(KVSP_curCharIsEndOfCommand)                                                                           \
 				{                                                                                                        \
 					error(KVSP_curCharPointer, __tr2qs_ctx("Missing right operand for operator '" __opstr "='", "kvs")); \
-					return 0;                                                                                            \
+					return nullptr;                                                                                      \
 				}                                                                                                        \
 				KviKvsTreeNodeData * d = parseOperationRightSide(true);                                                  \
 				if(!d)                                                                                                   \
-					return 0;                                                                                            \
+					return nullptr;                                                                                      \
 				return new __class(pBegin, d);                                                                           \
 				break;                                                                                                   \
 		}                                                                                                                \

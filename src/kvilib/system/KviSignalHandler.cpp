@@ -32,7 +32,7 @@
 
 #include "KviSignalHandler.h"
 
-#include <signal.h>
+#include <csignal>
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -67,14 +67,13 @@ bool kvi_signalHandlerSetup()
 	new KviSignalHandler();
 
 	struct sigaction sa;
+	::memset(&sa,0,sizeof(sa));
 
 	sa.sa_handler = KviSignalHandler::unixSignalHandler;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags |= SA_RESTART;
 
-	return
-		sigaction(SIGTERM, &sa, 0) == 0 &&
-		sigaction(SIGINT , &sa, 0) == 0;
+	return sigaction(SIGTERM, &sa, nullptr) == 0 && sigaction(SIGINT, &sa, nullptr) == 0;
 }
 
 // In your Unix signal handlers, you write a byte to the write end of
@@ -85,7 +84,7 @@ bool kvi_signalHandlerSetup()
 void KviSignalHandler::unixSignalHandler(int)
 {
 	char a = 1;
-	::write(fd[0], &a, sizeof(a));
+	(void)::write(fd[0], &a, sizeof(a));
 }
 
 // In the slot functions connected to the QSocketNotifier::activated()
@@ -97,7 +96,7 @@ void KviSignalHandler::handleSignal()
 {
 	sn->setEnabled(false);
 	char tmp;
-	::read(fd[1], &tmp, sizeof(tmp));
+	(void)::read(fd[1], &tmp, sizeof(tmp));
 
 	// do Qt stuff
 	QCoreApplication::quit();

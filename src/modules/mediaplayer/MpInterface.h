@@ -122,7 +122,7 @@ public:
 	// 0 if the player isn't playing anything and -1 if unknown
 	virtual int position();
 	// total length of the media (msecs)
-	// 0 if the player isn't playing anyting and -1 if unknown (e.g. a stream)
+	// 0 if the player isn't playing anything and -1 if unknown (e.g. a stream)
 	virtual int length();
 	// jump to position
 	virtual bool jumpTo(kvs_int_t & iPos);
@@ -219,7 +219,7 @@ public:
 	_interfaceclass##Descriptor::_interfaceclass##Descriptor()        \
 	    : MpInterfaceDescriptor()                                     \
 	{                                                                 \
-		m_pInstance = 0;                                              \
+		m_pInstance = nullptr;                                        \
 		m_szName = _name;                                             \
 		m_szDescription = _description;                               \
 	}                                                                 \

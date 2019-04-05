@@ -77,7 +77,7 @@
 //     resets the color, bold and underline flags
 //
 
-typedef struct _KviIrcViewLineChunk
+struct KviIrcViewLineChunk
 {
 	unsigned char type;      // chunk type
 	int iTextStart;          // index in the szText string of the beginning of the block
@@ -91,47 +91,47 @@ typedef struct _KviIrcViewLineChunk
 	} _KVI_PACKED colors;   // anonymous
 	                        //	QColor customBack;
 	QColor customFore;
-} /*_KVI_PACKED*/ KviIrcViewLineChunk;
+};
 
 //
 // The wrapped paintable data block
 //
 
-typedef struct _KviIrcViewWrappedBlock
+struct KviIrcViewWrappedBlock
 {
 	KviIrcViewLineChunk * pChunk; // pointer to real line chunk or 0 for word wraps
 	int block_start;              // this is generally different than pAttribute->block_idx!
 	int block_len;                // length if the block in characters
 	int block_width;              // width of the block in pixels
-} _KVI_PACKED KviIrcViewWrappedBlock;
+} _KVI_PACKED;
 
-typedef struct _KviIrcViewLine
+struct KviIrcViewLine
 {
 	// this is a text line in the IrcView's memory
 	unsigned int uIndex; // index of the text line (needed for find and splitting)
 	QString szText;      // data string without color codes nor escapes...
 	int iMsgType;        // type of the line (defines icon and colors)
 
-	// At line instert time the szData text is splitted in parts which
+	// At line insert time the szData text is split in parts which
 	// signal attribute changes (or icons)
 	unsigned int uChunkCount;      // number of allocated chunks
 	KviIrcViewLineChunk * pChunks; // pointer to the allocated structures
 
-	// At paint time the data is re-splitted in drawable chunks which
+	// At paint time the data is re-split in drawable chunks which
 	// are either real data chunks or line wraps.
 	// The algorightm that does this is lazy and computes it
 	// only once for a given widget width (iMaxLineWidth)
 	unsigned int uLineWraps;          // number of line wraps (lines - 1)
 	int iMaxLineWidth;                // width that the blocks were calculated for (lazy calculation)
 	int iBlockCount;                  // number of allocated paintable blocks
-	KviIrcViewWrappedBlock * pBlocks; // pointer to the re-splitted paintable blocks
+	KviIrcViewWrappedBlock * pBlocks; // pointer to the re-split paintable blocks
 
 	// next and previous line
-	struct _KviIrcViewLine * pPrev;
-	struct _KviIrcViewLine * pNext;
-} KviIrcViewLine;
+	KviIrcViewLine * pPrev;
+	KviIrcViewLine * pNext;
+};
 
-typedef struct _KviIrcViewWrappedBlockSelectionInfoTag
+struct KviIrcViewWrappedBlockSelectionInfo
 {
 	int selection_type;
 	int part_1_length;
@@ -140,7 +140,7 @@ typedef struct _KviIrcViewWrappedBlockSelectionInfoTag
 	int part_2_width;
 	int part_3_length;
 	int part_3_width;
-} KviIrcViewWrappedBlockSelectionInfo;
+};
 
 #ifdef COMPILE_ON_WINDOWS
 #pragma pack(pop, old_packing)

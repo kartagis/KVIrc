@@ -54,11 +54,11 @@
 extern KVIRC_API QPixmap * g_pShadedChildGlobalDesktopBackground;
 #endif
 
-typedef struct _UrlDlgList
+struct UrlDlgList
 {
 	UrlDialog * dlg;
 	int menu_id;
-} UrlDlgList;
+};
 
 const char * g_pUrlListFilename = "/list.kviurl";
 const char * g_pBanListFilename = "/list.kviban";
@@ -77,7 +77,7 @@ void loadBanList();
 UrlDlgList * findFrame();
 void url_module_help();
 
-#define KVI_URL_EXTENSION_NAME "URL module extenstion"
+#define KVI_URL_EXTENSION_NAME "URL module extension"
 
 UrlDialogTreeWidget::UrlDialogTreeWidget(QWidget * par)
     : QTreeWidget(par)
@@ -288,10 +288,10 @@ void UrlDialog::addUrl(QString url, QString window, QString count, QString times
 	UrlItem->setText(2, count);
 	UrlItem->setText(3, timestamp);
 
-	UrlItem->setForeground(0, KVI_OPTION_MIRCCOLOR(KVI_OPTION_MSGTYPE(KVI_OUT_URL).fore()));
-	UrlItem->setForeground(1, KVI_OPTION_MIRCCOLOR(KVI_OPTION_MSGTYPE(KVI_OUT_NONE).fore()));
-	UrlItem->setForeground(2, KVI_OPTION_MIRCCOLOR(KVI_OPTION_MSGTYPE(KVI_OUT_NONE).fore()));
-	UrlItem->setForeground(3, KVI_OPTION_MIRCCOLOR(KVI_OPTION_MSGTYPE(KVI_OUT_NONE).fore()));
+	UrlItem->setForeground(0, getMircColor(KVI_OPTION_MSGTYPE(KVI_OUT_URL).fore()));
+	UrlItem->setForeground(1, getMircColor(KVI_OPTION_MSGTYPE(KVI_OUT_NONE).fore()));
+	UrlItem->setForeground(2, getMircColor(KVI_OPTION_MSGTYPE(KVI_OUT_NONE).fore()));
+	UrlItem->setForeground(3, getMircColor(KVI_OPTION_MSGTYPE(KVI_OUT_NONE).fore()));
 
 	m_pUrlList->resizeColumnToContents(0);
 	m_pUrlList->resizeColumnToContents(3);
@@ -631,8 +631,10 @@ void loadBanList()
 static bool url_kvs_cmd_list(KviKvsModuleCommandCall *)
 {
 	UrlDlgList * tmpitem = findFrame();
-	if(tmpitem->dlg)
+	if(tmpitem->dlg) {
+		tmpitem->dlg->delayedAutoRaise();
 		return false;
+	}
 
 	tmpitem->dlg = new UrlDialog(g_List);
 	g_pMainWindow->addWindow(tmpitem->dlg);
@@ -673,7 +675,7 @@ UrlDlgList * findFrame()
 	@description:
 		This command opens a configuration window where it is possible
 		to setup plugin's parameters.[br]
-		You can also open this window by using popup menu in the URL list window[br]
+		You can also open this window by using popup menu in the URL list window
 		[big]Configure dialog options:[/big]
 		There is also a ban list widget, which allows to have a list of words that plugin must not catch.[br][br]
 		[i]e.g. if the word "ftp" is inserted in the ban list and if in a window there is an output like "ftp.kvirc.net",

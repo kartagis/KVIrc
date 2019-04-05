@@ -55,7 +55,7 @@ extern bool kvi_sendIpcMessage(const char * message); // KviIpcSentinel.cpp
 #define KVI_ARGS_RETCODE_ERROR 1
 #define KVI_ARGS_RETCODE_STOP 2
 
-typedef struct _ParseArgs
+struct ParseArgs
 {
 	int argc;
 	char ** argv;
@@ -66,7 +66,7 @@ typedef struct _ParseArgs
 	bool bExecuteCommandAndClose;
 	QString szExecCommand;
 	QString szExecRemoteCommand;
-} ParseArgs;
+};
 
 int parseArgs(ParseArgs * a)
 {
@@ -96,7 +96,7 @@ int parseArgs(ParseArgs * a)
 			KviQString::appendFormatted(szMessage, "Homepage: http://www.kvirc.net/\n");
 
 #if defined(COMPILE_ON_WINDOWS) || defined(COMPILE_ON_MINGW)
-			MessageBox(0, szMessage.toLocal8Bit().data(), "KVIrc", 0);
+			MessageBox(0, szMessage.toStdWString().c_str(), TEXT("KVIrc"), 0);
 #else
 			qDebug("%s", szMessage.toLocal8Bit().data());
 #endif
@@ -143,7 +143,7 @@ int parseArgs(ParseArgs * a)
 			KviQString::appendFormatted(szMessage, "                 irc[s][6]://<server>[:<port>][/<channel>[?<pass>]]\n");
 
 #if defined(COMPILE_ON_WINDOWS) || defined(COMPILE_ON_MINGW)
-			MessageBox(0, szMessage.toLocal8Bit().data(), "KVIrc", 0);
+			MessageBox(0, szMessage.toStdWString().c_str(), TEXT("KVIrc"), 0);
 #else
 			qDebug("%s", szMessage.toLocal8Bit().data());
 #endif

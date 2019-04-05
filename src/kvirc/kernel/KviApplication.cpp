@@ -87,8 +87,10 @@
 #include "KviSignalHandler.h"
 #include "KviPtrListIterator.h"
 #include "KviIrcNetwork.h"
+#include "KviRuntimeInfo.h"
 
 #include <QMenu>
+#include <QPainter>
 #include <algorithm>
 
 #ifndef COMPILE_NO_IPC
@@ -148,8 +150,8 @@ DO NOT REMOVE THEM EVEN IF THEY ARE DEFINED ALSO IN KviApplication.h
 
 #include <QDir>
 
-#include <stdlib.h> // rand & srand
-#include <time.h>   // time() in srand()
+#include <cstdlib>  // rand & srand
+#include <ctime>    // time() in srand()
 #include <map>      // std::map<>
 
 // Global application pointer
@@ -448,16 +450,8 @@ void KviApplication::setup()
 	// Script object controller
 	//g_pScriptObjectController = new KviScriptObjectController(); gone
 
-	QString szStylesheetFile;
-	getGlobalKvircDirectory(szStylesheetFile, Config, "style.css");
-	if(KviFileUtils::fileExists(szStylesheetFile))
-	{
-		QString szStyleData;
-		KviFileUtils::readFile(szStylesheetFile, szStyleData);
-		szStyleData.replace("global://", m_szGlobalKvircDir);
-		szStyleData.replace("local://", m_szLocalKvircDir);
-		setStyleSheet(szStyleData);
-	}
+	// Cache the QStyle theme before it's overriden
+	(void)KviRuntimeInfo::qtTheme();
 
 	// create the frame window, we're almost up and running...
 	createFrame();
@@ -1077,6 +1071,14 @@ void KviApplication::ipcMessage(char * pcMessage)
 			szCmd.cutRight(szCmd.len() - (iIdx + 1));
 		pConsole->output(KVI_OUT_SYSTEMMESSAGE, __tr2qs("Remote command received (%s ...)"), szCmd.ptr());
 	}
+	if (kvi_strEqualCIN(pcMessage, "openurl ", 8))
+	{
+		// there actually is no reliable way of raising the main window, but we try our best!
+#if defined(COMPILE_ON_WINDOWS) || defined(COMPILE_ON_MINGW)
+		SetForegroundWindow((HWND)g_pMainWindow->winId());
+#endif
+		g_pMainWindow->activateWindow();
+	}
 	KviKvsScript::run(pcMessage, pConsole);
 }
 #endif // COMPILE_NO_IPC
@@ -1277,16 +1279,18 @@ void KviApplication::updatePseudoTransparency()
 		{
 			QSize size = g_pApp->desktop()->screenGeometry(g_pApp->desktop()->primaryScreen()).size();
 			// get the Program Manager
-			HWND hWnd = FindWindow("Progman", "Program Manager");
+			HWND hWnd = FindWindow(TEXT("Progman"), TEXT("Program Manager"));
 			// Create and setup bitmap
-			HDC bitmap_dc = CreateCompatibleDC(qt_win_display_dc());
-			HBITMAP bitmap = CreateCompatibleBitmap(qt_win_display_dc(), size.width(), size.height());
+			const HDC displayDc = GetDC(0);
+			HDC bitmap_dc = CreateCompatibleDC(displayDc);
+			HBITMAP bitmap = CreateCompatibleBitmap(displayDc, size.width(), size.height());
 			HGDIOBJ null_bitmap = SelectObject(bitmap_dc, bitmap);
 
 			PrintWindow(hWnd, bitmap_dc, 0);
 
 			SelectObject(bitmap_dc, null_bitmap);
 			DeleteDC(bitmap_dc);
+			ReleaseDC(0, displayDc);
 			QPixmap pix = QtWin::fromHBITMAP(bitmap);
 
 			DeleteObject(bitmap);

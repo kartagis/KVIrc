@@ -270,13 +270,10 @@ bool KviPerlInterpreter::execute(
 		int idx = 0;
 		for(auto tmp : args)
 		{
-			const char * val = tmp.toUtf8().data();
-			if(val)
-			{
-				pArg = newSVpv(val, tmp.length());
-				if(!av_store(pArgs, idx, pArg))
-					SvREFCNT_dec(pArg);
-			}
+			QByteArray szVal = tmp.toUtf8();
+			pArg = newSVpv(szVal.data(), tmp.length());
+			if(!av_store(pArgs, idx, pArg))
+				SvREFCNT_dec(pArg);
 			idx++;
 		}
 	}
@@ -435,7 +432,11 @@ static bool perlcore_module_cleanup(KviModule *)
 static bool perlcore_module_can_unload(KviModule *)
 {
 #ifdef COMPILE_PERL_SUPPORT
-	return (g_pInterpreters->count() == 0);
+	return false;
+	/* return (g_pInterpreters->count() == 0);
+	 * Perlcore module can't be cleanly unloaded since PERL_SYS_INIT3 
+	 * and PERL_SYS_TERM should never be called more than once (#1105)
+	 */
 #endif // COMPILE_PERL_SUPPORT
 	return true;
 }

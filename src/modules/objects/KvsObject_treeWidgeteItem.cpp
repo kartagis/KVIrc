@@ -80,7 +80,7 @@ const char * const itemflags_tbl[] = {
 		!fn: $setText(<column:integer>,<text:string>)
 		Sets the text in column column to text, if column is a valid column number and text is different from the existing text.
 		!fn: <string> $text(<column:integer>)
-		Returs the text of the specified column.
+		Returns the text of the specified column.
 		!fn: $setPixmap(<column:integer>,<pixmap:hobject or imageID>)
 		Sets the pixmap in column column to pm, if pm is non-null and different from the current pixmap, and if column is non-negative.
 		Pixmap can be a KVIrc image ID, an image file or a [class]pixmap[/class] object.
@@ -345,7 +345,7 @@ KVSO_CLASS_FUNCTION(treeWidgetItem, isChecked)
 		c->returnValue()->setBoolean(false);
 		return true;
 	}
-	c->returnValue()->setBoolean(((QTreeWidgetItem *)m_pTreeWidgetItem)->checkState(0) == Qt::Checked ? 1 : 0);
+	c->returnValue()->setBoolean(((QTreeWidgetItem *)m_pTreeWidgetItem)->checkState(0) == Qt::Checked ? true : false);
 	return true;
 }
 

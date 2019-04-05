@@ -98,10 +98,10 @@ const int align_cod[] = {
 		Sets the resize mode of the parent widget in relation to this layout.
 		<mode> can be one of:[br]
 		[pre]
-			-Auto: this is the default[br]
-			-Fixed: the parent widget of this layout is resized to the "sizeHint" value and it cannot be resized by the user.[br]
-			-Minimum: the minimum size of the parent widget of this layout is set to minimumSize() and it cannot be smaller[br]
-			-FreeResize: the parent widget of this layout is not constrained at all[br]
+			-Auto: this is the default
+			-Fixed: the parent widget of this layout is resized to the "sizeHint" value and it cannot be resized by the user.
+			-Minimum: the minimum size of the parent widget of this layout is set to minimumSize() and it cannot be smaller
+			-FreeResize: the parent widget of this layout is not constrained at all
 		[/pre]
 */
 
@@ -139,6 +139,12 @@ bool KvsObject_layout::init(KviKvsRunTimeContext * pContext, KviKvsVariantList *
 	if(w->inherits("QToolBar"))
 	{
 		pContext->warning(__tr2qs_ctx("Qt does not support setting layouts on toolbar objects", "objects"));
+		return false;
+	}
+
+	if(w->inherits("QDockWidget"))
+	{
+		pContext->warning(__tr2qs_ctx("Qt does not support setting layouts on dockwidget objects", "objects"));
 		return false;
 	}
 	// If there already is a layout manager installed on this widget, QWidget won't let you install another.

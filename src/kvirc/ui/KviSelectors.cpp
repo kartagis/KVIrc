@@ -34,6 +34,7 @@
 #include <QPainter>
 #include <QLayout>
 #include <QColorDialog>
+#include <QGroupBox>
 #include <QPalette>
 #include <QFontDialog>
 #include <QAbstractItemView>
@@ -78,7 +79,7 @@ KviUIntSelector::KviUIntSelector(QWidget * par, const QString & txt, unsigned in
 
 	m_pOption = pOption;
 
-	// QSpinBox only holds integers and we want unsinged integers, so make sure the limits are correct
+	// QSpinBox only holds integers and we want unsigned integers, so make sure the limits are correct
 	if(m_bIsShortInt)
 	{
 		m_uLowBound = std::min({ uLowBound, static_cast<unsigned int>(std::numeric_limits<unsigned short int>::max()), static_cast<unsigned int>(std::numeric_limits<int>::max()) });
@@ -705,7 +706,7 @@ KviMircTextColorSelector::KviMircTextColorSelector(QWidget * par, const QString 
 	m_pForePopup = new QMenu(this);
 	connect(m_pForePopup, SIGNAL(triggered(QAction *)), this, SLOT(foreSelected(QAction *)));
 	int iColor;
-	for(iColor = 0; iColor < KVI_MIRCCOLOR_MAX_FOREGROUND; iColor++)
+	for(iColor = 0; iColor < KVI_MIRCCOLOR_MAX; iColor++)
 	{
 		QPixmap tmp(120, 16);
 		tmp.fill(KVI_OPTION_MIRCCOLOR(iColor));
@@ -720,7 +721,7 @@ KviMircTextColorSelector::KviMircTextColorSelector(QWidget * par, const QString 
 	connect(m_pBackPopup, SIGNAL(triggered(QAction *)), this, SLOT(backSelected(QAction *)));
 	pAction = m_pBackPopup->addAction(__tr2qs("Transparent"));
 	pAction->setData(KviControlCodes::Transparent);
-	for(iColor = 0; iColor < KVI_MIRCCOLOR_MAX_BACKGROUND; iColor++)
+	for(iColor = 0; iColor < KVI_MIRCCOLOR_MAX; iColor++)
 	{
 		QPixmap tmp(120, 16);
 		tmp.fill(KVI_OPTION_MIRCCOLOR(iColor));
@@ -752,7 +753,7 @@ void KviMircTextColorSelector::setButtonPalette()
 {
 	QPalette pal;
 
-	if(m_uBack > KVI_MIRCCOLOR_MAX_BACKGROUND)
+	if(m_uBack > KVI_MIRCCOLOR_MAX)
 	{
 		if(m_uBack != KviControlCodes::Transparent)
 			m_uBack = KviControlCodes::Transparent;
@@ -763,8 +764,8 @@ void KviMircTextColorSelector::setButtonPalette()
 		pal = QPalette(KVI_OPTION_MIRCCOLOR(m_uBack));
 	}
 
-	if(m_uFore > KVI_MIRCCOLOR_MAX_FOREGROUND)
-		m_uFore = KVI_MIRCCOLOR_MAX_FOREGROUND;
+	if(m_uFore > KVI_MIRCCOLOR_MAX)
+		m_uFore = KVI_MIRCCOLOR_MAX;
 
 	pal.setColor(QPalette::ButtonText, KVI_OPTION_MIRCCOLOR(m_uFore));
 	pal.setColor(QPalette::Text, KVI_OPTION_MIRCCOLOR(m_uFore));
@@ -813,7 +814,8 @@ KviSoundSelector::~KviSoundSelector()
 
 void KviSoundSelector::playSound()
 {
-	KviKvsScript::run("snd.play $0", nullptr, new KviKvsVariantList(new KviKvsVariant(m_pLineEdit->text())));
+	KviKvsVariantList soundParams{new KviKvsVariant{m_pLineEdit->text()}};
+	KviKvsScript::run("snd.play $0", nullptr, &soundParams);
 }
 
 void KviSoundSelector::setEnabled(bool bEnabled)
@@ -845,18 +847,31 @@ KviChannelListSelector::KviChannelListSelector(QWidget * par, const QString & tx
 	m_pTreeWidget->setHeaderLabels(columnLabels);
 	m_pTreeWidget->setColumnWidth(0, 200);
 	m_pTreeWidget->setColumnWidth(1, 200);
-	KviTalHBox * pEditsHBox = new KviTalHBox(this);
 
-	m_pChanLineEdit = new QLineEdit(pEditsHBox);
-	m_pChanLineEdit->setPlaceholderText(__tr2qs("Channel name")); // setPlaceHolderText() is not the correct and consistent way to fix this, this is the easy way out adding more inconsistency across dialogs.
+	QGroupBox * pEditsGroupBox = new QGroupBox(__tr2qs("Add channel"), this);
+	QGridLayout * pChannelLayout = new QGridLayout(pEditsGroupBox);
+
+	QString szMsg = __tr2qs("Name");
+	szMsg.append(":");
+
+	QLabel * pNameLabel = new QLabel(szMsg, pEditsGroupBox);
+	pChannelLayout->addWidget(pNameLabel, 1, 0);
+
+	m_pChanLineEdit = new QLineEdit(pEditsGroupBox);
 	connect(m_pChanLineEdit, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 	connect(m_pChanLineEdit, SIGNAL(returnPressed()), this, SLOT(addClicked()));
+	pChannelLayout->addWidget(m_pChanLineEdit, 1, 1);
 
-	m_pPassLineEdit = new QLineEdit(pEditsHBox);
+	szMsg = __tr2qs("Password");
+	szMsg.append(":");
+
+	QLabel * pPasswordLabel = new QLabel(szMsg, pEditsGroupBox);
+	pChannelLayout->addWidget(pPasswordLabel, 2, 0);
+
+	m_pPassLineEdit = new QLineEdit(pEditsGroupBox);
 	m_pPassLineEdit->setEchoMode(QLineEdit::Password);
-	m_pPassLineEdit->setPlaceholderText(__tr2qs("Channel password")); //setPlaceHolderText() is not the correct and consistent way to fix this, this is the easy way out adding more inconsistency across dialogs.
-	connect(m_pPassLineEdit, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 	connect(m_pPassLineEdit, SIGNAL(returnPressed()), this, SLOT(addClicked()));
+	pChannelLayout->addWidget(m_pPassLineEdit, 2, 1);
 
 	KviTalHBox * hBox = new KviTalHBox(this);
 
@@ -875,6 +890,10 @@ KviChannelListSelector::KviChannelListSelector(QWidget * par, const QString & tx
 	setSpacing(4);
 	setStretchFactor(m_pTreeWidget, 1);
 	setEnabled(bEnabled);
+
+	// Default disable the add and remove buttons
+	m_pAddButton->setEnabled(false);
+	m_pRemoveButton->setEnabled(false);
 }
 
 KviChannelListSelector::~KviChannelListSelector()
@@ -908,6 +927,7 @@ void KviChannelListSelector::textChanged(const QString &)
 
 void KviChannelListSelector::itemSelectionChanged()
 {
+	m_pRemoveButton->setEnabled(m_pTreeWidget->selectedItems().size() > 0);
 }
 
 void KviChannelListSelector::addClicked()

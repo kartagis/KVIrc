@@ -170,7 +170,7 @@ void KviCustomToolBar::childEvent(QChildEvent * e)
 {
 	if(KviActionManager::customizingToolBars())
 	{
-		// this is useful for droppped and dragged-out children
+		// this is useful for dropped and dragged-out children
 		if(e->type() == QEvent::ChildAdded)
 		{
 			if(e->child()->isWidgetType())
@@ -358,7 +358,7 @@ QSize KviCustomToolBarSeparator::sizeHint() const
 	int iExtent = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent, &opt, this);
 
 	if(m_pToolBar->orientation() == Qt::Horizontal)
-		return QSize(iExtent, 0);
+		return { iExtent, 0 };
 	else
 		return QSize(0, iExtent);
 }

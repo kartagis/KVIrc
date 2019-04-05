@@ -181,7 +181,7 @@ public:
 	* \param pExtData Extended data (usually 0)
 	* \return int
 	*/
-	int run(KviWindow * pWnd, KviKvsVariantList * pParams = 0, KviKvsVariant * pRetVal = 0, int iRunFlags = 0, KviKvsExtendedRunTimeData * pExtData = 0);
+	int run(KviWindow * pWnd, KviKvsVariantList * pParams = nullptr, KviKvsVariant * pRetVal = nullptr, int iRunFlags = 0, KviKvsExtendedRunTimeData * pExtData = nullptr);
 
 	/**
 	* \brief Runs the script
@@ -199,7 +199,7 @@ public:
 	* \param pExtData Extended data (usually 0)
 	* \return int
 	*/
-	int run(KviWindow * pWnd, KviKvsVariantList * pParams, QString & szRetVal, int iRunFlags = 0, KviKvsExtendedRunTimeData * pExtData = 0);
+	int run(KviWindow * pWnd, KviKvsVariantList * pParams, QString & szRetVal, int iRunFlags = 0, KviKvsExtendedRunTimeData * pExtData = nullptr);
 
 	/**
 	* \brief Runs the script
@@ -225,7 +225,7 @@ public:
 	* \param pRetVal Return value buffer (0 if you ignore it)
 	* \return int
 	*/
-	static int run(const QString & szCode, KviWindow * pWindow, KviKvsVariantList * pParams = 0, KviKvsVariant * pRetVal = 0);
+	static int run(const QString & szCode, KviWindow * pWindow, KviKvsVariantList * pParams = nullptr, KviKvsVariant * pRetVal = nullptr);
 
 	/**
 	* \brief Static helper for quick evaluating parameters
@@ -264,14 +264,14 @@ public:
 
 protected:
 	/**
-	* \brief Returns true after a succesfull parsing, false otherwise
+	* \brief Returns true after a successful parsing, false otherwise
 	*
 	* pOutput is useful only for printing errors; if 0, no errors are printed
 	* \param pOutput The output window for errors
 	* \param iRunFlags A combination of run flags (usually default)
 	* \return bool
 	*/
-	bool parse(KviWindow * pOutput = 0, int iRunFlags = 0);
+	bool parse(KviWindow * pOutput = nullptr, int iRunFlags = 0);
 
 	/**
 	* \brief Runs the script
@@ -285,7 +285,7 @@ protected:
 	* \param pExtData Extended data (usually 0)
 	* \return int
 	*/
-	int execute(KviWindow * pWnd, KviKvsVariantList * pParams = 0, KviKvsVariant * pRetVal = 0, int iRunFlags = 0, KviKvsExtendedRunTimeData * pExtData = 0);
+	int execute(KviWindow * pWnd, KviKvsVariantList * pParams = nullptr, KviKvsVariant * pRetVal = nullptr, int iRunFlags = 0, KviKvsExtendedRunTimeData * pExtData = nullptr);
 
 	/**
 	* \brief Runs the script

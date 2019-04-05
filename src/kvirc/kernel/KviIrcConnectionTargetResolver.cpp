@@ -28,7 +28,6 @@
 #include "KviIrcServerDataBase.h"
 #include "KviProxy.h"
 #include "KviProxyDataBase.h"
-#include "KviError.h"
 #include "kvi_out.h"
 #include "KviOptions.h"
 #include "KviIrcSocket.h"
@@ -43,28 +42,17 @@
 #include "KviIrcConnectionTarget.h"
 #include "KviIrcNetwork.h"
 
-#include <stdlib.h>
-
 #include <QTimer>
+
+#include <cstdlib>
 
 extern KVIRC_API KviIrcServerDataBase * g_pServerDataBase;
 extern KVIRC_API KviProxyDataBase * g_pProxyDataBase;
 
 KviIrcConnectionTargetResolver::KviIrcConnectionTargetResolver(KviIrcConnection * pConnection)
-    : QObject()
+    : QObject(), m_pConnection(pConnection)
 {
-	m_pConnection = pConnection;
-	m_pTarget = nullptr;
 	m_pConsole = m_pConnection->console();
-
-	m_pStartTimer = nullptr;
-	m_pProxyDns = nullptr;
-	m_pServerDns = nullptr;
-
-	m_eState = Idle;
-	m_eStatus = Success;
-
-	m_iLastError = KviError::Success;
 }
 
 KviIrcConnectionTargetResolver::~KviIrcConnectionTargetResolver()
@@ -162,7 +150,7 @@ void KviIrcConnectionTargetResolver::asyncStartResolve()
 	{
 		m_pConsole->output(KVI_OUT_SYSTEMMESSAGE,
 		    __tr2qs("Attempting to 'bounce' on proxy %s on port %u (protocol %s)"),
-		    m_pTarget->proxy()->hostName().toUtf8().data(),
+		    m_pTarget->proxy()->hostname().toUtf8().data(),
 		    m_pTarget->proxy()->port(),
 		    m_pTarget->proxy()->protocolName().toUtf8().data());
 
@@ -179,16 +167,10 @@ void KviIrcConnectionTargetResolver::lookupProxyHostname()
 	bool bValidIp;
 #ifdef COMPILE_IPV6_SUPPORT
 	if(m_pTarget->proxy()->isIPv6())
-	{
 		bValidIp = KviNetUtils::isValidStringIPv6(m_pTarget->proxy()->ip());
-	}
 	else
-	{
 #endif
 		bValidIp = KviNetUtils::isValidStringIp(m_pTarget->proxy()->ip());
-#ifdef COMPILE_IPV6_SUPPORT
-	}
-#endif
 
 	if(bValidIp)
 	{
@@ -206,27 +188,18 @@ void KviIrcConnectionTargetResolver::lookupProxyHostname()
 	{
 #ifdef COMPILE_IPV6_SUPPORT
 		if(m_pTarget->proxy()->isIPv6())
-		{
-			bValidIp = KviNetUtils::isValidStringIPv6(m_pTarget->proxy()->hostName());
-		}
+			bValidIp = KviNetUtils::isValidStringIPv6(m_pTarget->proxy()->hostname());
 		else
-		{
 #endif
-			bValidIp = KviNetUtils::isValidStringIp(m_pTarget->proxy()->hostName());
-#ifdef COMPILE_IPV6_SUPPORT
-		}
-#endif
+			bValidIp = KviNetUtils::isValidStringIp(m_pTarget->proxy()->hostname());
+
 		if(bValidIp)
 		{
-			m_pTarget->proxy()->setIp(m_pTarget->proxy()->hostName());
+			m_pTarget->proxy()->setIp(m_pTarget->proxy()->hostname());
 			if(m_pTarget->proxy()->protocol() != KviProxy::Http && m_pTarget->proxy()->protocol() != KviProxy::Socks5)
-			{
 				lookupServerHostname();
-			}
 			else
-			{
 				terminate(Success, KviError::Success);
-			}
 		}
 		else
 		{
@@ -241,7 +214,7 @@ void KviIrcConnectionTargetResolver::lookupProxyHostname()
 			m_pProxyDns = new KviDnsResolver();
 			connect(m_pProxyDns, SIGNAL(lookupDone(KviDnsResolver *)), this, SLOT(proxyLookupTerminated(KviDnsResolver *)));
 
-			if(!m_pProxyDns->lookup(m_pTarget->proxy()->hostName(),
+			if(!m_pProxyDns->lookup(m_pTarget->proxy()->hostname(),
 			       m_pTarget->proxy()->isIPv6() ? KviDnsResolver::IPv6 : KviDnsResolver::IPv4))
 			{
 				m_pConsole->outputNoFmt(KVI_OUT_SYSTEMWARNING,
@@ -259,7 +232,7 @@ void KviIrcConnectionTargetResolver::lookupProxyHostname()
 				if(!_OUTPUT_MUTE)
 					m_pConsole->output(KVI_OUT_SYSTEMMESSAGE,
 					    __tr2qs("Looking up the proxy hostname (%s)..."),
-					    m_pTarget->proxy()->hostName().toUtf8().data());
+					    m_pTarget->proxy()->hostname().toUtf8().data());
 			}
 		}
 	}
@@ -309,16 +282,10 @@ void KviIrcConnectionTargetResolver::lookupServerHostname()
 
 #ifdef COMPILE_IPV6_SUPPORT
 	if(m_pTarget->server()->isIPv6())
-	{
 		bValidIp = KviNetUtils::isValidStringIPv6(m_pTarget->server()->ip());
-	}
 	else
-	{
 #endif
 		bValidIp = KviNetUtils::isValidStringIp(m_pTarget->server()->ip());
-#ifdef COMPILE_IPV6_SUPPORT
-	}
-#endif
 
 	if(bValidIp && m_pTarget->server()->cacheIp())
 	{
@@ -332,16 +299,11 @@ void KviIrcConnectionTargetResolver::lookupServerHostname()
 	{
 #ifdef COMPILE_IPV6_SUPPORT
 		if(m_pTarget->server()->isIPv6())
-		{
 			bValidIp = KviNetUtils::isValidStringIPv6(m_pTarget->server()->hostName());
-		}
 		else
-		{
 #endif
 			bValidIp = KviNetUtils::isValidStringIp(m_pTarget->server()->hostName());
-#ifdef COMPILE_IPV6_SUPPORT
-		}
-#endif
+
 		if(bValidIp)
 		{
 			m_pTarget->server()->setIp(m_pTarget->server()->hostName());
@@ -489,8 +451,8 @@ void KviIrcConnectionTargetResolver::haveServerIp()
 	{
 		if(!validateLocalAddress(m_pTarget->bindAddress(), bindAddress))
 		{
-			QString szBindAddress = m_pTarget->bindAddress();
-			if((szBindAddress.indexOf('.') != -1) || (szBindAddress.indexOf(':') != -1))
+			const QString & szBindAddress = m_pTarget->bindAddress();
+			if(szBindAddress.contains('.') || szBindAddress.contains(':'))
 			{
 				if(!_OUTPUT_MUTE)
 					m_pConsole->output(KVI_OUT_SYSTEMWARNING,
@@ -502,7 +464,7 @@ void KviIrcConnectionTargetResolver::haveServerIp()
 				if(!_OUTPUT_MUTE)
 					m_pConsole->output(KVI_OUT_SYSTEMWARNING,
 					    __tr2qs("The specified bind address (%Q) is not valid (the interface it refers to might be down)"),
-					    &(szBindAddress));
+					    &szBindAddress);
 			}
 		}
 	}
@@ -519,7 +481,7 @@ void KviIrcConnectionTargetResolver::haveServerIp()
 					if(!validateLocalAddress(KVI_OPTION_STRING(KviOption_stringIPv6ConnectionBindAddress), bindAddress))
 					{
 						// if it is not an interface name, kill it for now and let the user correct the address
-						if(KVI_OPTION_STRING(KviOption_stringIPv6ConnectionBindAddress).indexOf(':') != -1)
+						if(KVI_OPTION_STRING(KviOption_stringIPv6ConnectionBindAddress).contains(':'))
 						{
 							if(!_OUTPUT_MUTE)
 								m_pConsole->output(KVI_OUT_SYSTEMWARNING,
@@ -554,7 +516,7 @@ void KviIrcConnectionTargetResolver::haveServerIp()
 					if(!validateLocalAddress(KVI_OPTION_STRING(KviOption_stringIPv4ConnectionBindAddress), bindAddress))
 					{
 						// if it is not an interface name, kill it for now and let the user correct the address
-						if(KVI_OPTION_STRING(KviOption_stringIPv4ConnectionBindAddress).indexOf(':') != -1)
+						if(KVI_OPTION_STRING(KviOption_stringIPv4ConnectionBindAddress).contains(':'))
 						{
 							if(!_OUTPUT_MUTE)
 								m_pConsole->output(KVI_OUT_SYSTEMWARNING,

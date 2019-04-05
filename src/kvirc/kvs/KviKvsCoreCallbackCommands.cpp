@@ -71,7 +71,7 @@ namespace KviKvsCoreCallbackCommands
 			This command also performs reverse lookups (if you pass an IP address as <hostname>).[br]
 			The callback command gets passed five parameters:[br]
 			$0 contains the query string (<dnsquery> in fact)[br]
-			$1 contains the value 1 if the query was succesfull.[br]
+			$1 contains the value 1 if the query was successful.[br]
 			In that case the remaining parameters are set as follows:[br]
 			$2 contains the first IP address associated to the <dnsquery>[br]
 			$3 contains the hostname associated to the <dnsquery>[br]
@@ -201,13 +201,13 @@ namespace KviKvsCoreCallbackCommands
 				}
 				[comment]# Remove the alias j[/comment]
 				alias(j){}
-				[comment]# Add the alias j in namespace letters[/comments]
+				[comment]# Add the alias j in namespace letters[/comment]
 				alias(letters::j)
 				{
 					[cmd]echo[/cmd] "j"
 				}
-				[comment]# Kill the whole 'letters' namespace[/comments]
-				alias(autoaway::){}
+				[comment]# Kill the whole 'letters' namespace[/comment]
+				alias(letters::){}
 			[/example]
 		@seealso:
 			[doc:kvs_aliasesandfunctions]Aliases and functions[/doc]
@@ -530,9 +530,13 @@ namespace KviKvsCoreCallbackCommands
 			list instead of being added.[br]
 			The <event_name> may be one of the KVIrc builtin event names
 			or a numeric code (from 0 to 999) of a RAW server message.[br]
+			<handler_name> can only contain alphanumeric characters. If the
+			provided handler name contains invalid characters, they are
+			silently removed. If the provided handler name does not contain
+			a single valid character, the handler will be named "unnamed".[br]
 			If the -q switch is specified then the command runs in quiet mode.
 		@seealso:
-			[cmd]eventctl[/cmd]
+			[cmd]eventctl[/cmd] [fnc]$iseventenabled[/fnc]
 	*/
 
 	KVSCCC(event)
@@ -558,6 +562,7 @@ namespace KviKvsCoreCallbackCommands
 		}
 		else
 		{
+			KviKvsEventManager::instance()->cleanHandlerName(szHandlerName);
 			iNumber = KviKvsEventManager::instance()->findAppEventIndexByName(szEventName);
 			if(!KviKvsEventManager::instance()->isValidAppEvent(iNumber))
 			{
@@ -650,7 +655,7 @@ namespace KviKvsCoreCallbackCommands
 				the active console window and continues running.
 			!sw: -s=<interpreter command> | --shell=<interpreter command>
 				Use <interpreter command> instead of the default interpreter [i]sh -c[/i].
-				The <interpreter command> should be able to launch the interpeter
+				The <interpreter command> should be able to launch the interpreter
 				and should contain the necessary arguments in order to allow
 				KVIrc to pass the [i]commandline[/i] by appending it as the last parameter.
 			!sw: -d | --direct
@@ -1030,8 +1035,6 @@ namespace KviKvsCoreCallbackCommands
 
 	KVSCCC(privateimpl)
 	{
-		Q_UNUSED(__pSwitches);
-
 		kvs_hobject_t hObject;
 		QString szFunctionName;
 		KVSCCC_PARAMETERS_BEGIN
