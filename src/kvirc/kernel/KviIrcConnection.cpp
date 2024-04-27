@@ -837,8 +837,7 @@ bool KviIrcConnection::sendData(const char * pcBuffer, int iBuflen)
 	*(pData->data() + iBuflen) = '\r';
 	*(pData->data() + iBuflen + 1) = '\n';
 
-	QString szMsg = (const char *)(pData->data());
-	szMsg.truncate(iBuflen);
+	QString szMsg = QString::fromUtf8((const char *)(pData->data()), iBuflen);
 
 	// notify the monitors
 	for(auto & m : context()->monitorList())
@@ -1569,7 +1568,7 @@ void KviIrcConnection::loginToIrcServer()
 		int iBack = KVI_OPTION_UINT(KviOption_uintUserIrcViewOwnBackground);
 		if(iBack != KviControlCodes::Transparent)
 		{
-			szTags.sprintf("%c%d,%d%c",
+			szTags = QString::asprintf("%c%d,%d%c",
 			    KviControlCodes::Color,
 			    KVI_OPTION_UINT(KviOption_uintUserIrcViewOwnForeground),
 			    iBack,
@@ -1581,7 +1580,7 @@ void KviIrcConnection::loginToIrcServer()
 	if(iGenderAvatarTag != 0)
 	{
 		QString szTags;
-		szTags.sprintf("%c%d%c",
+		szTags = QString::asprintf("%c%d%c",
 		    KviControlCodes::Color,
 		    iGenderAvatarTag,
 		    KviControlCodes::Reset);
@@ -1700,7 +1699,7 @@ void KviIrcConnection::joinChannels(const std::vector<std::pair<QString, QString
 		[](const std::pair<QString, QString> & left,
 		   const std::pair<QString, QString> & right)
 	{
-		return left.second.count() > right.second.count();
+		return left.second.size() > right.second.size();
 	});
 
 	// We send the channel list in chunks to avoid overflowing the 510 character limit on the message.

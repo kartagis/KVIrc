@@ -124,16 +124,11 @@ void KviMenuBar::setupHelpPopup(QMenu * pop)
 	help->addSeparator();
 	pAction = help->addAction(*(g_pIconManager->getSmallIcon(KviIconManager::HomePage)), __tr2qs("KVIrc Home&page"));
 	pAction->setData(KVI_INTERNALCOMMAND_KVIRC_HOMEPAGE);
-	if(QString::compare(KviLocale::instance()->localeName(), QLatin1String("ru"), Qt::CaseInsensitive) == 0)
-	{
-		pAction = help->addAction(*(g_pIconManager->getSmallIcon(KviIconManager::HomePage)), __tr2qs("KVIrc Russian Home&page"));
-		pAction->setData(KVI_INTERNALCOMMAND_KVIRC_HOMEPAGE_RU);
-	}
 	help->addSeparator();
 	pAction = help->addAction(*(g_pIconManager->getSmallIcon(KviIconManager::Bug)), __tr2qs("Report a Bug / Propose Improvements"));
 	pAction->setData(KVI_INTERNALCOMMAND_OPENURL_KVIRC_BUGTRACK);
 	help->addSeparator();
-	pAction = help->addAction(*(g_pIconManager->getSmallIcon(KviIconManager::Channel)), __tr2qs("Join KVIrc's Channel on freenode"));
+	pAction = help->addAction(*(g_pIconManager->getSmallIcon(KviIconManager::Channel)), __tr2qs("Join KVIrc's Channel on Libera.Chat"));
 	pAction->setData(KVI_INTERNALCOMMAND_JOIN_KVIRC_ON_FREENODE);
 }
 
@@ -351,7 +346,7 @@ void KviMenuBar::setupToolsPopup(QMenu * pop)
 
 	// moved the old tools here
 	m->addAction(*(g_pIconManager->getSmallIcon(KviIconManager::IconManager)), __tr2qs("Show &Icon Table"), g_pIconManager, SLOT(showIconWidget()));
-#ifdef COMPILE_KDE4_SUPPORT
+#ifdef COMPILE_KDE_SUPPORT
 	QAction * pAction = m->addAction(*(g_pIconManager->getSmallIcon(KviIconManager::Terminal)), __tr2qs("Open &Terminal"), this, SLOT(actionTriggeredBool(bool)));
 	pAction->setData(KVI_INTERNALCOMMAND_TERM_OPEN);
 #endif
@@ -384,7 +379,7 @@ void KviMenuBar::updateToolbarsPopup()
 
 int KviMenuBar::getDefaultItemRealIndex(int iDefaultIndex)
 {
-	return std::clamp(iDefaultIndex, 0, actions().count());
+	return qBound(0, iDefaultIndex, actions().count());
 }
 
 KviScriptMenuBarItem * KviMenuBar::findMenu(const QString & text)

@@ -35,7 +35,11 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QTextStream>
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QTextCodec>
+#else
+#include <QStringConverter>
+#endif
 #include <QByteArray>
 #include <QDateTime>
 
@@ -761,7 +765,7 @@ static bool file_kvs_fnc_ls(KviKvsModuleFunctionCall * c)
 		return true;
 	}
 
-	QFlags<QDir::Filter> iFlags = nullptr;
+	QFlags<QDir::Filter> iFlags;
 	if(szFlags.isEmpty())
 		iFlags = QDir::Dirs | QDir::Files | QDir::NoSymLinks | QDir::Readable | QDir::Writable | QDir::Executable | QDir::Hidden | QDir::System;
 	else
@@ -784,7 +788,7 @@ static bool file_kvs_fnc_ls(KviKvsModuleFunctionCall * c)
 			iFlags |= QDir::System;
 	}
 
-	QFlags<QDir::SortFlag> iSort = nullptr;
+	QFlags<QDir::SortFlag> iSort;
 	if(szFlags.isEmpty())
 		iSort = QDir::Unsorted;
 	else
@@ -1081,8 +1085,11 @@ static bool file_kvs_fnc_readLines(KviKvsModuleFunctionCall * c)
 
 	QTextStream stream(&f);
 
-	if(!bLocal8Bit)
-		stream.setCodec(QTextCodec::codecForMib(106));
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+    	stream.setCodec(bLocal8Bit ? QTextCodec::codecForLocale() : QTextCodec::codecForMib(106));
+#else
+		stream.setEncoding(bLocal8Bit ? QStringConverter::Latin1 : QStringConverter::Utf8);
+#endif
 
 	for(int i = 0; i < iStartLine; i++)
 		stream.readLine();
@@ -1666,7 +1673,7 @@ static bool file_kvs_fnc_time(KviKvsModuleFunctionCall * c)
 	}
 	else if(szType.toLower() == "c")
 	{
-		time = f.created();
+		time = f.birthTime();
 	}
 	else if(szType.toLower() == "m")
 	{

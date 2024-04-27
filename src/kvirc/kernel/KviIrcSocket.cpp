@@ -181,7 +181,7 @@ void KviIrcSocket::outputSSLError(const QString & szMsg)
 
 void KviIrcSocket::outputProxyMessage(const QString & szMsg)
 {
-	for(const auto & it : szMsg.split('\n', QString::SkipEmptyParts))
+	for(const auto & it : szMsg.split('\n', Qt::SkipEmptyParts))
 	{
 		QString szTemporary = it.trimmed();
 		m_pConsole->output(KVI_OUT_SOCKETMESSAGE, __tr2qs("[PROXY]: %Q"), &szTemporary);
@@ -190,7 +190,7 @@ void KviIrcSocket::outputProxyMessage(const QString & szMsg)
 
 void KviIrcSocket::outputProxyError(const QString & szMsg)
 {
-	for(const auto & it : szMsg.split('\n', QString::SkipEmptyParts))
+	for(const auto & it : szMsg.split('\n', Qt::SkipEmptyParts))
 	{
 		QString szTemporary = it.trimmed();
 		m_pConsole->output(KVI_OUT_SOCKETERROR, __tr2qs("[PROXY ERROR]: %Q"), &szTemporary);
@@ -1355,6 +1355,9 @@ void KviIrcSocket::doSSLHandshake(int)
 		reset();
 		return; // ops ?
 	}
+
+	// TLS: Set SNI hostname
+	m_pSSL->setTLSHostname(m_pIrcServer->hostName().toUtf8().data());
 
 	switch(m_pSSL->connect())
 	{
